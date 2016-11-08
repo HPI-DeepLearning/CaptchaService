@@ -1,2 +1,2 @@
 # CaptchaService
-A captcha service that helps researchers to label their datasets
+A captcha service that helps researchers label their datasets
