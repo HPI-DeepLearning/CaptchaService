@@ -50,6 +50,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.facebook',
     # cors headers
     'corsheaders',
+    'api_app'
 )
 
 MIDDLEWARE_CLASSES = (
