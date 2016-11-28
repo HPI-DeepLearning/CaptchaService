@@ -18,6 +18,7 @@ from django.contrib import admin
 from .views import FacebookLogin
 
 urlpatterns = [
+    url(r'^captcha/', include('api_app.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^accounts/', include('allauth.urls')),
     url(r'^rest-auth/', include('rest_auth.urls')),
