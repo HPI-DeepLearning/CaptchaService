@@ -3,11 +3,25 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# directories
+icdar_words
+Challenge2_Training_Task12_Images
+Challenge2_Training_Task1_GT
+
 # C extensions
 *.so
 
 # sqlite
-*.sqlite3
+**/*.sqlite3
+
+# Crypto keys
+**/keys
+
+# captcha images
+**/captchas
+
+# django migrations
+**/migrations
 
 # Distribution / packaging
 .Python

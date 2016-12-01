@@ -15,5 +15,6 @@ Install with pip::
 Run
 ---
 
+    put the icdar_words folder in the root project directory
     python manage.py db_seed
     python manage.py runserver
