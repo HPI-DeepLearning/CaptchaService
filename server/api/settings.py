@@ -16,6 +16,9 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+ENCRYPTED_FIELDS_KEYDIR = BASE_DIR + '/keys/'
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
@@ -46,11 +49,9 @@ INSTALLED_APPS = (
     'allauth',
     'allauth.account',
     'rest_auth.registration',
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.facebook',
     # cors headers
     'corsheaders',
-    'api_app'
+    'captcha_service'
 )
 
 MIDDLEWARE_CLASSES = (
@@ -65,7 +66,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'api.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -95,7 +96,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'username'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = True
-WSGI_APPLICATION = 'api.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # CORS Headers
