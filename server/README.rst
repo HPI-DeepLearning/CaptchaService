@@ -1,4 +1,5 @@
 A Captcha Service implemented in Django REST Framework using Python2
+
 Installation
 ------------
 
@@ -14,7 +15,9 @@ Install with pip::
 
 Run
 ---
+Run with manage.py::
 
     put the icdar_words folder in the root project directory
+    python manage.py collectstatic
     python manage.py db_seed
     python manage.py runserver
