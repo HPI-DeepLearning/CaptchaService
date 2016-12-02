@@ -32,6 +32,7 @@ def get_sessions(request):
 
 @api_view(['POST'])
 def validate(request):
+    # params
     params = request.POST
     session_key = params.get('session_key', None)
     first_result = params.get('first_result', None)
@@ -40,7 +41,15 @@ def validate(request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     # retrieve coresponding session
-    s = CaptchaSession.objects.get(pk=session_key)
+    try:
+        s = CaptchaSession.objects.get(pk=session_key)
+    except:
+        return Response("Session does not exist.", status=status.HTTP_404_NOT_FOUND)
+    # assert the remote ip when opening the session and validating them are identical
+    # perhaps, remote ip can't be resolved in this case they are evaluated to None - it would still work
+    if not get_ip(request) == s.origin:
+        return Response("ip when opening the session and ip when validating it are not in agreement.",
+                        status=status.HTTP_403_FORBIDDEN)
     first_captcha = s.solved_captcha_id
     second_captcha = s.unsolved_captcha_id
     # validate input
