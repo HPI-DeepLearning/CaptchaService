@@ -8,4 +8,5 @@ urlpatterns = [
         url(r'^request$', views.request, name="request"),
         url(r'^validate$', views.validate, name="validate"),
         url(r'^renew$', views.renew, name="renew"),
+        url(r'^sessions$', views.get_sessions, name='sessions')
         ]

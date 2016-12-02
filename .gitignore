@@ -23,6 +23,10 @@ Challenge2_Training_Task1_GT
 # django migrations
 **/migrations
 
+# static file dirs
+**/static
+
+
 # Distribution / packaging
 .Python
 env/
