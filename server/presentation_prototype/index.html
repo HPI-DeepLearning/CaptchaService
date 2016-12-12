@@ -57,18 +57,6 @@
 <script>
     $(document).ready(function() {
 
-        /*
-        <div class="heading"></div>
-        <div class="images" style="display: flex; justify-content: space-around">
-            <img class="captcha" alt="captcha" style="width: 40%" />
-            <img class="captcha" alt="captcha" style="width: 40%" />
-        </div>
-        <div class="actions" style="display: flex; justify-content: flex-end">
-            <button class="renew">renew</button>
-            <button class="validate">Submit</button>
-        </div>
-        */
-
         $.ajax('http://localhost:8000/captcha/request', {
             success: function(data) {
                 var firstcaptcha = data.first_url.replace('static/', '');

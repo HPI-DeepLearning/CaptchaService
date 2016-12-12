@@ -89,7 +89,7 @@ def renew(request):
 
 def _get_random_captcha_pair():
     # TODO: retrieve one solved and one unsolved captcha token
-    count = CaptchaToken.objects.all().__len__()
+    count = CaptchaToken.objects.count()
     first_captcha, second_captcha = randint(1, count), randint(1, count)
     first = CaptchaToken.objects.get(pk=first_captcha)
     second = CaptchaToken.objects.get(pk=second_captcha)
