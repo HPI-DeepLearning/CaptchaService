@@ -108,3 +108,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+# data-set
+icdar_words/*
