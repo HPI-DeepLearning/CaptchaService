@@ -26,6 +26,7 @@ def request(request):
 @api_view(['GET'])
 def get_sessions(request):
     # for debugging purpose
+    # CaptchaSession.objects.all().delete()
     sessions = CaptchaSession.objects.all().values()
     print(sessions)
     return Response()
@@ -35,8 +36,12 @@ def validate(request):
     # params
     params = request.POST
     session_key = params.get('session_key', None)
-    first_result = params.get('first_result', None)
-    second_result = params.get('second_result', None)
+    result = params.get('result', None).strip()
+    try:
+        first_result, second_result = result.split(' ')
+    except:
+        first_result, second_result = None, None
+
     if _any_parameter_unset(session_key, first_result, second_result):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -50,8 +55,8 @@ def validate(request):
     if not get_ip(request) == s.origin:
         return Response("ip when opening the session and ip when validating it are not in agreement.",
                         status=status.HTTP_403_FORBIDDEN)
-    first_captcha = s.solved_captcha_id
-    second_captcha = s.unsolved_captcha_id
+    first_captcha = s.solved_captcha
+    second_captcha = s.unsolved_captcha
     # validate input
     if first_result.strip() == first_captcha.result.strip() \
        and second_result.strip() == second_captcha.result.strip():
@@ -60,6 +65,7 @@ def validate(request):
         s.delete()
     else:
         valid = False
+    print(valid)
     return JsonResponse({'actual_result_1': first_captcha.result,
                          'given_result_1': first_result,
                          'actual_result_2': second_captcha.result,
@@ -68,16 +74,26 @@ def validate(request):
 
 @api_view(['POST'])
 def renew(request):
-    pass  #TODO
+    params = request.POST
+    session_key = params.get('session_key', None)
+    print(session_key)
+    if _any_parameter_unset(session_key):
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+    s = CaptchaSession.objects.get(session_key=session_key)
+    first, second = _get_random_captcha_pair()
+    s.update_captchas(first, second)
+    return JsonResponse({'first_url': first.file.url,
+                         'second_url': second.file.url})
+
 
 
 def _get_random_captcha_pair():
     # TODO: retrieve one solved and one unsolved captcha token
     count = CaptchaToken.objects.all().__len__()
     first_captcha, second_captcha = randint(1, count), randint(1, count)
-    first_url = CaptchaToken.objects.get(pk=first_captcha)
-    second_url = CaptchaToken.objects.get(pk=second_captcha)
-    return first_url, second_url
+    first = CaptchaToken.objects.get(pk=first_captcha)
+    second = CaptchaToken.objects.get(pk=second_captcha)
+    return first, second
 
 def _create_session(first_captcha_id, second_captcha_id, request):
     uid = uuid.uuid4()

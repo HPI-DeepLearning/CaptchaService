@@ -27,17 +27,25 @@ class CaptchaToken(models.Model):
 
 class CaptchaSession(models.Model):
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
-    solved_captcha_id = models.ForeignKey(
+    solved_captcha = models.ForeignKey(
         CaptchaToken,
         on_delete=models.PROTECT,
-        limit_choices_to={'resolved': True},
+        #  limit_choices_to={'resolved': True},
         related_name='solved'
     )
-    unsolved_captcha_id = models.ForeignKey(
+    unsolved_captcha = models.ForeignKey(
         CaptchaToken,
         on_delete=models.PROTECT,
-        limit_choices_to={'resolved': False},
+        #  limit_choices_to={'resolved': False},
         related_name='unsolved'
     )
     order = models.BooleanField()# 0 -> solved unsolved 1 -> unsolved solved
     origin = models.CharField(max_length=128) # ip address
+
+    def update_captchas(self, first_c, second_c):
+        print(first_c.id)
+        self.solved_captcha_id = first_c.id
+        # self.solved = first_c
+        self.unsolved_captcha_id = second_c.id
+        # self.unsolved = second_c
+        self.save(force_update=True)
