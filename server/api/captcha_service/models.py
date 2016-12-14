@@ -22,8 +22,15 @@ class CaptchaToken(models.Model):
         return token
 
     def add_proposal(self, proposal):
-        self.proposals['proposal'] += 1
+        self.proposals[proposal] += 1
         self.save()
+
+class TextCaptcha(CaptchaToken):
+    """docstring for TextCaptcha."""
+    def __init__(self, arg):
+        super(TextCaptcha, self).__init__()
+        self.arg = arg
+
 
 class CaptchaSession(models.Model):
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
