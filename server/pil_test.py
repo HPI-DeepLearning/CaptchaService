@@ -10,8 +10,8 @@ from PIL import Image
 def shuffle(input_data, output_data, size):
 	width, height = size
 	pix=[0, 0]
-	delta_x = 30     #lower delta for high distortion
-	delta_y = 30     #higher delta for low distortion
+	delta_x = 40     #lower delta for high distortion
+	delta_y = 40     #higher delta for low distortion
 
 	for x in range(width):
 		for y in range(height):
@@ -56,7 +56,14 @@ input_data = input_img.load()
 output_img = Image.new("RGB", input_img.size, "black")
 output_data = output_img.load()
 
-wave(input_data, output_data, input_img.size)
-shuffle(output_data, output_data, input_img.size)
+if sys.argv[2] == "w":
+	wave(input_data, output_data, input_img.size)
+if sys.argv[2] == "s":
+	shuffle(input_data, output_data, input_img.size)
+if sys.argv[2] == "b":
+	wave(input_data, output_data, input_img.size)
+	shuffle(output_data, output_data, input_img.size)
 
 output_img.save(outfile)
+input_img.show()
+output_img.show()
