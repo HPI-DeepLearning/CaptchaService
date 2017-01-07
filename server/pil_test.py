@@ -6,7 +6,7 @@ import numpy as np
 import random
 from decimal import *
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 # def shuffle(input_data, output_data, size):
 # 	width, height = size
@@ -31,9 +31,7 @@ from PIL import Image
 #
 # 			output_data[x,y] = input_data[tuple(pix)]
 
-def wave_transformation(input_data, output_data, size):
-	width, height = size
-
+def wave_transformation(input_data, output_data, width, height):
 	frequency_modifier = Decimal(random.uniform(0.6, 0.8) * (width / height))
 	frequency = frequency_modifier * (Decimal(1) / Decimal((width / 2))) * Decimal(math.pi)
 
@@ -68,13 +66,18 @@ def main():
 	input_img = Image.open(infile)
 	input_data = input_img.load()
 
+	width = input_img.size[0]
+	height = input_img.size[1]
 	dominant_color = find_dominant_color(input_img)
 
-	output_img = Image.new("RGB", input_img.size, dominant_color)
+	output_img = Image.new("RGB", input_img.size, "white")
 	output_data = output_img.load()
 
-#	if sys.argv[2] == "w":
-#		wave_transformation(input_data, output_data, input_img.size)
+	draw = ImageDraw.Draw(input_img)
+	draw.line((0, height/2, width-1, height/2), fill=dominant_color, width=height/10)
+
+	if sys.argv[2] == "w":
+		wave_transformation(input_data, output_data, width, height)
 
 	#if sys.argv[2] == "s":
 	#	shuffle(input_data, output_data, input_img.size)
