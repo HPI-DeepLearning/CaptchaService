@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from captcha_service.models import CaptchaToken
+from captcha_service.models import CaptchaToken, TextCaptchaToken
 
 DATA_PATH = settings.SEED_DATA_PATH
 CAPTCHA_FILE_1 = 'icdar_words/Challenge2_Test_Task3_GT.txt'
@@ -15,7 +15,8 @@ class Command(BaseCommand):
         with open(file_path, 'rb') as f:
             image = f.read()
         file_name = file_path.split('/')[-1]
-        token = CaptchaToken.create(file_name, image, True, solution)
+	token = TextCaptchaToken()
+        token.create(file_name, image, True, solution)
         token.save()
 
 
