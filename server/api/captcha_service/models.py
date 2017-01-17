@@ -10,10 +10,11 @@ from rest_framework.decorators import api_view
 from ipware.ip import get_ip
 from random import randint
 import uuid
+from polymorphic.models import PolymorphicModel
 
 
 
-class CaptchaToken(models.Model):
+class CaptchaToken(PolymorphicModel):
     file = models.ImageField(upload_to='static/captchas/')
     # counter object that counts user proposals
     # to this captcha. If captcha is solved None is saved.
@@ -54,7 +55,7 @@ class ImageCaptchaToken(CaptchaToken):
         self.captcha_type = "image"
 	return self
 
-class CaptchaSession(models.Model):
+class CaptchaSession(PolymorphicModel):
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
 
     origin = models.CharField(max_length=128) # ip address
