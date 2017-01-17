@@ -40,7 +40,7 @@ class TextCaptchaToken(CaptchaToken):
     result = EncryptedCharField(max_length=256)
 
     def create(self, file_name, file_data, resolved, result=''):
-        CaptchaToken.create(self, file_name, file_data, resolved)
+        super(TextCaptchaToken, self).create(file_name, file_data, resolved)
         self.result = result
         self.captcha_type = "text"
         return self
@@ -50,7 +50,7 @@ class ImageCaptchaToken(CaptchaToken):
     result = EncryptedCharField(max_length=256)
 
     def create(self, file_name, file_data, resolved, result=''):
-        CaptchaToken.create(self, file_name, file_data, resolved)
+        super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
         self.result = result
         self.captcha_type = "image"
 	return self
@@ -85,7 +85,7 @@ class TextCaptchaSession(CaptchaSession):
 
 
     def create(self, remote_ip):
-	CaptchaSession.create(self, remote_ip, 'textsession')
+	super(TextCaptchaSession, self).create(remote_ip, 'textsession')
         self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
 
         self.order = randint(0,1)
