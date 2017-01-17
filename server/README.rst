@@ -17,7 +17,7 @@ Run
 ---
 Run with manage.py::
 
-    put the icdar_words folder in the root project directory
+    put the icdar_words, brontosaurus and platypus folder in the root project directory
     python manage.py db_seed
     python manage.py collectstatic
     python manage.py runserver

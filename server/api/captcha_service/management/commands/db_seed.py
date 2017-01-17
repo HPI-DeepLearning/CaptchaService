@@ -4,9 +4,9 @@ from captcha_service.models import CaptchaToken, TextCaptchaToken, ImageCaptchaT
 
 DATA_PATH = settings.SEED_DATA_PATH
 DATASETS = [
-#('icdar_words/Challenge2_Test_Task3_GT.txt',
-#'icdar_words/Challenge2_Test_Task3_Images/',
-#'text'),
+('icdar_words/Challenge2_Test_Task3_GT.txt',
+'icdar_words/Challenge2_Test_Task3_Images/',
+'text'),
 
 ('platypus/platypus.txt',
 'platypus/',
