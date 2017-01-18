@@ -12,8 +12,6 @@ from random import randint
 import uuid
 from polymorphic.models import PolymorphicModel
 
-
-
 class CaptchaToken(PolymorphicModel):
     file = models.ImageField(upload_to='static/captchas/')
     # counter object that counts user proposals
@@ -47,7 +45,8 @@ class TextCaptchaToken(CaptchaToken):
 
 class ImageCaptchaToken(CaptchaToken):
 
-    result = EncryptedCharField(max_length=256)
+    result = models.BooleanField(default=False)
+    task = models.CharField(max_length=128)
 
     def create(self, file_name, file_data, resolved, result=''):
         CaptchaToken.create(self, file_name, file_data, resolved)
