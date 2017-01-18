@@ -31,7 +31,7 @@ class Command(BaseCommand):
 	    token.save()
 	elif captcha_type == "image":
 	    token = ImageCaptchaToken()
-	    token.create(file_name, image, True, solution)
+	    token.create(file_name, image, True, solution, True)
 	    token.save()
 
     def _yield_captcha_data(self):

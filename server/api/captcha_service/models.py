@@ -45,11 +45,14 @@ class TextCaptchaToken(CaptchaToken):
 
 class ImageCaptchaToken(CaptchaToken):
 
-    result = models.BooleanField(default=False)
+    #The task is a category of pictures and it should be tested if the token belongs to it
+    #The result just defines if the token belongs to the given category
     task = models.CharField(max_length=128)
+    result = models.BooleanField(default=False)
 
-    def create(self, file_name, file_data, resolved, result=''):
+    def create(self, file_name, file_data, resolved, task, result=''):
         super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
+	self.task = task
         self.result = result
         self.captcha_type = "image"
 	return self
