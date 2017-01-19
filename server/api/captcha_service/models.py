@@ -11,6 +11,8 @@ from ipware.ip import get_ip
 from random import randint
 import uuid
 from polymorphic.models import PolymorphicModel
+import json
+from .fields import SeparatedValuesField
 
 class CaptchaToken(PolymorphicModel):
     file = models.ImageField(upload_to='static/captchas/')
@@ -75,13 +77,13 @@ class TextCaptchaSession(CaptchaSession):
         TextCaptchaToken,
         on_delete=models.PROTECT,
         #  limit_choices_to={'resolved': True},
-        related_name='solved'
+	related_name = 'solved'
     )
     unsolved_captcha = models.ForeignKey(
         TextCaptchaToken,
         on_delete=models.PROTECT,
         #  limit_choices_to={'resolved': False},
-        related_name='unsolved'
+	related_name = 'unsolved'
     )
     order = models.BooleanField()# 0 -> solved unsolved 1 -> unsolved solved
 
@@ -147,6 +149,7 @@ class TextCaptchaSession(CaptchaSession):
 
     @staticmethod
     def _get_random_captcha_pair():
+	# TODO: retrieve captchas by id not pk
         # TODO: retrieve one solved and one unsolved captcha token
         count = TextCaptchaToken.objects.count()
         first_captcha, second_captcha = randint(1, count), randint(1, count)
@@ -169,3 +172,60 @@ class TextCaptchaSession(CaptchaSession):
                 first_url = self.unsolved_captcha.file.url
                 second_url = self.solved_captcha.file.url
 	return first_url, second_url
+
+class ImageCaptchaSession(CaptchaSession):
+
+    #order is a list with 0->solved_captcha_token, 1->unsolved_captcha_token
+    #since there is ListField in models we store it as JSON
+    #TODO change sepField?
+    order = models.TextField(null=True)
+
+    #list with stored captcha_token
+    image_token_list = SeparatedValuesField() #customField for saving lists
+    task = models.TextField(null=True)
+		
+    def create(self, remote_ip):
+	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
+
+	#create order
+	order_list = []
+	for i in range(9):
+	#TODO get exactly 4 solved Token
+	    order_list.append(randint(0,1))
+	self.order = json.dumps(order_list)
+
+	self.image_token_list = self.get_image_token_list(order_list)
+	url_list = []
+	for i in range(len(self.image_token_list)): 
+	    url_list.append(self.image_token_list[i].file.url)
+
+	response = JsonResponse({'url_list' : url_list,
+				 'task' : self.task,
+				 'session_key': self.session_key,
+	                     	'type': 'imagecaptcha'})
+	return self, response	
+    
+    def get_image_token_list(self, order_list):
+	token_list = []
+	current_token = models.ForeignKey(
+        ImageCaptchaToken,
+        on_delete=models.PROTECT,
+        #  limit_choices_to={'resolved': True},
+    )
+
+	image_tokens = ImageCaptchaToken.objects.all()
+	count = image_tokens.count()
+	for boolean in order_list:
+	#TODO limit choices to resolved/unresolved tokens
+	    if (boolean == True):
+		current_token_index = randint(0,count-1)
+		current_token = image_tokens[current_token_index] 
+		#choose task randomly by first token
+		if(self.task == None):
+		    self.task = current_token.task
+	    else:
+		count = ImageCaptchaToken.objects.count()
+		current_token_index = randint(0,count-1)
+		current_token = image_tokens[current_token_index]	    
+	    token_list.append(current_token)
+	return token_list	

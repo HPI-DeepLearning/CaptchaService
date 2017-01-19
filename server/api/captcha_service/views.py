@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from ipware.ip import get_ip
-from .models import CaptchaToken, CaptchaSession, TextCaptchaSession
+from .models import CaptchaToken, CaptchaSession, TextCaptchaSession, ImageCaptchaSession
 from random import randint
 import uuid
 
@@ -12,8 +12,9 @@ import uuid
 def request(request):
 
     remote_ip = get_ip(request)
-    session = TextCaptchaSession()
+    session = ImageCaptchaSession()
     session, response = session.create(remote_ip)
+    print session.image_token_list
     session.save()
     return response
 
@@ -63,4 +64,4 @@ def _any_parameter_unset(*keys):
         for key in keys:
             if not key:
                 return True
-        return False
+        return False, ImageCaptchaSession
