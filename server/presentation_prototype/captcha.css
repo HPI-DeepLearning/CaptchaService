@@ -1,0 +1,67 @@
+/* Overlay styles */
+.overlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    display: none;
+    z-index: 999;
+    right: 0;
+    left: 0;
+    background: rgba(0,0,0,0);
+    transition: background-color .3s ease-out;
+    -webkit-transition: background-color .3s ease-out;
+    -moz-transition: background-color .3s ease-out;
+    -o-transition: background-color .3s ease-out;
+    -transition: background-color .3s ease-out;
+}
+
+.show {
+    display: block;
+}
+
+.fadeIn {
+    background-color: rgba(0,0,0,0.6);
+}
+
+/* Captcha card styles */
+.captcha-card {
+    width: 30%;
+}
+
+/* Captcha content styles */
+.captcha-content {
+    width: 100%;
+    padding: 20px 10px;
+    border-bottom: solid 1px black;
+}
+
+/* Captcha image-container styles */
+.captcha-image-container {
+    width: 100%;
+    display: -webkit-box;  /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+    display: -ms-flexbox;  /* TWEENER - IE 10 */
+    display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+    display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
+    justify-content: space-around;
+    align-items: baseline;
+}
+#first-text-token,
+#second-text-token {
+    border: 8px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Captcha input styles */
+.captcha-input {
+    width: 80%;
+}
+
+/* Captcha actions styles */
+.captcha-actions {
+    width: 100%;
+    padding: 10px 20px;
+    text-align: right
+}
+
+.captcha-actions a {
+    padding: 0 10px;
+}
