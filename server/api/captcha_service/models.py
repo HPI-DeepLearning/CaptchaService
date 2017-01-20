@@ -99,7 +99,7 @@ class TextCaptchaSession(CaptchaSession):
         response = JsonResponse({'first_url': first_url,
                              'second_url': second_url,
                              'session_key': self.session_key,
-	                     'type': 'textcaptcha'})
+	                     'type': 'text'})
 
 	return self, response
 
@@ -121,7 +121,6 @@ class TextCaptchaSession(CaptchaSession):
 	   else:
 	       self.unsolved_captcha.add_proposal(first_result.strip())
 
-           #delte session TODO Is it better to delete session in view?
 	   self.delete()
 
         else:
@@ -144,17 +143,18 @@ class TextCaptchaSession(CaptchaSession):
 	first_url, second_url = self._adjust_captchas_to_order()
 	self.save(force_update=True)
 	return JsonResponse({'first_url': first_url,
-				'second_url': second_url})
+				'second_url': second_url,
+				'type' : 'text'})
 
 
     @staticmethod
     def _get_random_captcha_pair():
-	# TODO: retrieve captchas by id not pk
         # TODO: retrieve one solved and one unsolved captcha token
-        count = TextCaptchaToken.objects.count()
-        first_captcha, second_captcha = randint(1, count), randint(1, count)
-        first = TextCaptchaToken.objects.get(pk=first_captcha)
-        second = TextCaptchaToken.objects.get(pk=second_captcha)
+        text_tokens = TextCaptchaToken.objects.all()
+	count = text_tokens.count()
+	first_captcha_index, second_captcha_index = randint(0, count-1), randint(0, count-1)
+        first = text_tokens[first_captcha_index]
+        second = text_tokens[second_captcha_index]
         return first, second
 
     def _any_parameter_unset(*keys):
@@ -177,7 +177,6 @@ class ImageCaptchaSession(CaptchaSession):
 
     #order is a list with 0->solved_captcha_token, 1->unsolved_captcha_token
     #since there is ListField in models we store it as JSON
-    #TODO change sepField?
     order = models.TextField(null=True)
 
     #list with stored captcha_token
@@ -187,12 +186,14 @@ class ImageCaptchaSession(CaptchaSession):
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
-	#create order
-	order_list = []
-	for i in range(9):
-	#TODO get exactly 4 solved Token
-	    order_list.append(randint(0,1))
-	self.order = json.dumps(order_list)
+	#create order with exactly 4 solved tokens, 0 -> solved, 1 -> unsolved
+	order_list = [1] * 9
+	i = 0
+	while (i < 4):
+	    index_solved = randint(0,8)
+	    if(order_list[index_solved] == 1):
+		order_list[index_solved] = 0
+		i += 1
 
 	self.image_token_list = self.get_image_token_list(order_list)
 	url_list = []
@@ -202,7 +203,7 @@ class ImageCaptchaSession(CaptchaSession):
 	response = JsonResponse({'url_list' : url_list,
 				 'task' : self.task,
 				 'session_key': self.session_key,
-	                     	'type': 'imagecaptcha'})
+	                     	'type': 'image'})
 	return self, response	
     
     def get_image_token_list(self, order_list):

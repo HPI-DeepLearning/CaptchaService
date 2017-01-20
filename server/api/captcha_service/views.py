@@ -14,7 +14,6 @@ def request(request):
     remote_ip = get_ip(request)
     session = ImageCaptchaSession()
     session, response = session.create(remote_ip)
-    print session.image_token_list
     session.save()
     return response
 
@@ -28,6 +27,7 @@ def get_sessions(request):
 
 @api_view(['POST'])
 def validate(request):
+    print request
     params = request.POST
     session_key = params.get('session_key', None)
     session = _retrieve_corresponding_session(session_key, request)
