@@ -51,6 +51,7 @@ INSTALLED_APPS = (
     'rest_auth.registration',
     # cors headers
     'corsheaders',
+    'polymorphic',
     'captcha_service'
 )
 

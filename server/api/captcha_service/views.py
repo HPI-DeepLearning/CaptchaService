@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from ipware.ip import get_ip
-from .models import CaptchaToken, CaptchaSession, TextCaptchaSession
+from .models import CaptchaToken, CaptchaSession, TextCaptchaSession, ImageCaptchaSession
 from random import randint
 import uuid
 
@@ -12,7 +12,7 @@ import uuid
 def request(request):
 
     remote_ip = get_ip(request)
-    session = TextCaptchaSession()
+    session = ImageCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
     return response
@@ -27,6 +27,7 @@ def get_sessions(request):
 
 @api_view(['POST'])
 def validate(request):
+    print request
     params = request.POST
     session_key = params.get('session_key', None)
     session = _retrieve_corresponding_session(session_key, request)
@@ -54,15 +55,13 @@ def _retrieve_corresponding_session(session_key, request):
     if not get_ip(request) == session.origin:
         return Response("ip when opening the session and ip when validating it are not in agreement.",
                         status=status.HTTP_403_FORBIDDEN)
+    
+    return session
 
 
-    #TODO add comment for next user to add new types here
-    #TODO change to dictionary for switch
-    if session.session_type == 'textsession':
-        return TextCaptchaSession.objects.get(pk=session_key) 
 
 def _any_parameter_unset(*keys):
         for key in keys:
             if not key:
                 return True
-        return False
+        return False, ImageCaptchaSession

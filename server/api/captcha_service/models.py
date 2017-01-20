@@ -10,17 +10,18 @@ from rest_framework.decorators import api_view
 from ipware.ip import get_ip
 from random import randint
 import uuid
+from polymorphic.models import PolymorphicModel
+import json
+from .fields import SeparatedValuesField
 
-
-
-class CaptchaToken(models.Model):
+class CaptchaToken(PolymorphicModel):
     file = models.ImageField(upload_to='static/captchas/')
     # counter object that counts user proposals
     # to this captcha. If captcha is solved None is saved.
     proposals = PickledObjectField()
     resolved = models.BooleanField(default=False)
-    captcha_type = models.CharField(max_length=128)    
-   
+    captcha_type = models.CharField(max_length=128)
+
     def create(self, file_name, file_data, resolved):
         self.file.save(file_name, ContentFile(file_data))
         self.proposals = Counter()
@@ -30,21 +31,35 @@ class CaptchaToken(models.Model):
         self.proposals[proposal] += 1
         self.save()
 
+    def __str__(self):
+	return str(self.id) + ", " + self.captcha_type
+
 class TextCaptchaToken(CaptchaToken):
     """docstring for TextCaptcha."""
 
-    result = EncryptedCharField(max_length=256)  
+    result = EncryptedCharField(max_length=256)
 
     def create(self, file_name, file_data, resolved, result=''):
-        CaptchaToken.create(self, file_name, file_data, resolved)
+        super(TextCaptchaToken, self).create(file_name, file_data, resolved)
         self.result = result
-        self.captcha_type = "text" 
+        self.captcha_type = "text"
         return self
 
-   
+class ImageCaptchaToken(CaptchaToken):
 
-   
-class CaptchaSession(models.Model):
+    #The task is a category of pictures and it should be tested if the token belongs to it
+    #The result just defines if the token belongs to the given category
+    task = models.CharField(max_length=128)
+    result = models.BooleanField(default=False)
+
+    def create(self, file_name, file_data, resolved, task, result=''):
+        super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
+	self.task = task
+        self.result = result
+        self.captcha_type = "image"
+	return self
+
+class CaptchaSession(PolymorphicModel):
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
 
     origin = models.CharField(max_length=128) # ip address
@@ -62,34 +77,34 @@ class TextCaptchaSession(CaptchaSession):
         TextCaptchaToken,
         on_delete=models.PROTECT,
         #  limit_choices_to={'resolved': True},
-        related_name='solved'
+	related_name = 'solved'
     )
     unsolved_captcha = models.ForeignKey(
         TextCaptchaToken,
         on_delete=models.PROTECT,
         #  limit_choices_to={'resolved': False},
-        related_name='unsolved'
+	related_name = 'unsolved'
     )
     order = models.BooleanField()# 0 -> solved unsolved 1 -> unsolved solved
 
-    
+
     def create(self, remote_ip):
-	CaptchaSession.create(self, remote_ip, 'textsession')
+	super(TextCaptchaSession, self).create(remote_ip, 'textsession')
         self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
-        
+
         self.order = randint(0,1)
 	first_url, second_url = self._adjust_captchas_to_order()
-        
-        #create JsonResponse for WebApplication 
+
+        #create JsonResponse for WebApplication
         response = JsonResponse({'first_url': first_url,
                              'second_url': second_url,
                              'session_key': self.session_key,
-	                     'type': 'textcaptcha'})
-	
-	return self, response
-  
+	                     'type': 'text'})
 
-    def validate(self, params): 
+	return self, response
+
+
+    def validate(self, params):
         result = params.get('result', None).strip()
         try:
             first_result, second_result = result.split(' ')
@@ -99,24 +114,23 @@ class TextCaptchaSession(CaptchaSession):
 	    return Response(status=status.HTTP_400_BAD_REQUEST)
 	# validate input
 	if self.order == 0 and self.solved_captcha.result.strip() == first_result.strip() or self.order == 1 and self.solved_captcha.result.strip() == second_result.strip():
-       
+
 	   valid = True
 	   if self.order == 0:
 	       self.unsolved_captcha.add_proposal(second_result.strip())
 	   else:
 	       self.unsolved_captcha.add_proposal(first_result.strip())
 
-           #delte session TODO Is it better to delete session in view? 
 	   self.delete()
 
-        else: 
-           valid = False 
+        else:
+           valid = False
 
 	print(valid)
 
 	return JsonResponse({'valid': valid})
 
-# 	for debugging purpose		
+# 	for debugging purpose
 #	return JsonResponse({'solved_result': self.solved_captcha.result,
 #				 'unsolved_result_2': self.unsolved_captcha.result,
 #				 'given_result_1': first_result,
@@ -129,20 +143,22 @@ class TextCaptchaSession(CaptchaSession):
 	first_url, second_url = self._adjust_captchas_to_order()
 	self.save(force_update=True)
 	return JsonResponse({'first_url': first_url,
-				'second_url': second_url}) 
-	
+				'second_url': second_url,
+				'type' : 'text'})
 
-    @staticmethod 
-    def _get_random_captcha_pair(): 
-        # TODO: retrieve one solved and one unsolved captcha token 
-        count = TextCaptchaToken.objects.count() 
-        first_captcha, second_captcha = randint(1, count), randint(1, count) 
-        first = TextCaptchaToken.objects.get(pk=first_captcha) 
-        second = TextCaptchaToken.objects.get(pk=second_captcha) 
+
+    @staticmethod
+    def _get_random_captcha_pair():
+        # TODO: retrieve one solved and one unsolved captcha token
+        text_tokens = TextCaptchaToken.objects.all()
+	count = text_tokens.count()
+	first_captcha_index, second_captcha_index = randint(0, count-1), randint(0, count-1)
+        first = text_tokens[first_captcha_index]
+        second = text_tokens[second_captcha_index]
         return first, second
 
     def _any_parameter_unset(*keys):
-        
+
 	for key in keys:
             if not key:
                 return True
@@ -154,5 +170,63 @@ class TextCaptchaSession(CaptchaSession):
                 second_url = self.unsolved_captcha.file.url
         else:
                 first_url = self.unsolved_captcha.file.url
-                second_url = self.solved_captcha.file.url 
+                second_url = self.solved_captcha.file.url
 	return first_url, second_url
+
+class ImageCaptchaSession(CaptchaSession):
+
+    #order is a list with 0->solved_captcha_token, 1->unsolved_captcha_token
+    #since there is ListField in models we store it as JSON
+    order = models.TextField(null=True)
+
+    #list with stored captcha_token
+    image_token_list = SeparatedValuesField() #customField for saving lists
+    task = models.TextField(null=True)
+		
+    def create(self, remote_ip):
+	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
+
+	#create order with exactly 4 solved tokens, 0 -> solved, 1 -> unsolved
+	order_list = [1] * 9
+	i = 0
+	while (i < 4):
+	    index_solved = randint(0,8)
+	    if(order_list[index_solved] == 1):
+		order_list[index_solved] = 0
+		i += 1
+
+	self.image_token_list = self.get_image_token_list(order_list)
+	url_list = []
+	for i in range(len(self.image_token_list)): 
+	    url_list.append(self.image_token_list[i].file.url)
+
+	response = JsonResponse({'url_list' : url_list,
+				 'task' : self.task,
+				 'session_key': self.session_key,
+	                     	'type': 'image'})
+	return self, response	
+    
+    def get_image_token_list(self, order_list):
+	token_list = []
+	current_token = models.ForeignKey(
+        ImageCaptchaToken,
+        on_delete=models.PROTECT,
+        #  limit_choices_to={'resolved': True},
+    )
+
+	image_tokens = ImageCaptchaToken.objects.all()
+	count = image_tokens.count()
+	for boolean in order_list:
+	#TODO limit choices to resolved/unresolved tokens
+	    if (boolean == True):
+		current_token_index = randint(0,count-1)
+		current_token = image_tokens[current_token_index] 
+		#choose task randomly by first token
+		if(self.task == None):
+		    self.task = current_token.task
+	    else:
+		count = ImageCaptchaToken.objects.count()
+		current_token_index = randint(0,count-1)
+		current_token = image_tokens[current_token_index]	    
+	    token_list.append(current_token)
+	return token_list	
