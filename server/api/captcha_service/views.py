@@ -10,9 +10,14 @@ import uuid
 
 @api_view(['GET'])
 def request(request):
-
     remote_ip = get_ip(request)
-    session = ImageCaptchaSession()
+
+    captcha_type = randint(0,1)
+    if captcha_type == 1:
+        session = ImageCaptchaSession()
+    else:
+        session = TextCaptchaSession()
+
     session, response = session.create(remote_ip)
     session.save()
     return response
@@ -46,7 +51,7 @@ def renew(request):
 
 
 def _retrieve_corresponding_session(session_key, request):
-    try: 
+    try:
         session = CaptchaSession.objects.get(pk=session_key)
     except:
         return Response("Session does not exist.", status=status.HTTP_404_NOT_FOUND)
@@ -55,7 +60,7 @@ def _retrieve_corresponding_session(session_key, request):
     if not get_ip(request) == session.origin:
         return Response("ip when opening the session and ip when validating it are not in agreement.",
                         status=status.HTTP_403_FORBIDDEN)
-    
+
     return session
 
 
