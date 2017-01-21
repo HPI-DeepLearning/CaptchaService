@@ -15,9 +15,14 @@ import os
 
 @api_view(['GET'])
 def request(request):
-
     remote_ip = get_ip(request)
-    session = ImageCaptchaSession()
+
+    captcha_type = randint(0,1)
+    if captcha_type == 1:
+        session = ImageCaptchaSession()
+    else:
+        session = TextCaptchaSession()
+
     session, response = session.create(remote_ip)
     session.save()
     return response

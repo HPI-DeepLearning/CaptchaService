@@ -157,13 +157,17 @@ class TextCaptchaSession(CaptchaSession):
 
     @staticmethod
     def _get_random_captcha_pair():
-        # TODO: retrieve one solved and one unsolved captcha token
-        text_tokens = TextCaptchaToken.objects.all()
-	count = text_tokens.count()
-	first_captcha_index, second_captcha_index = randint(0, count-1), randint(0, count-1)
-        first = text_tokens[first_captcha_index]
-        second = text_tokens[second_captcha_index]
-        return first, second
+        solved_text_tokens = TextCaptchaToken.objects.filter(resolved=True)
+        unsolved_text_tokens = TextCaptchaToken.objects.filter(resolved=False)
+
+	solved_count = solved_text_tokens.count()
+	unsolved_count = unsolved_text_tokens.count()
+
+	solved_captcha_index, unsolved_captcha_index = randint(0, solved_count-1), randint(0, unsolved_count-1)
+
+        solved = solved_text_tokens[solved_captcha_index]
+        unsolved = unsolved_text_tokens[unsolved_captcha_index]
+        return solved, unsolved
 
     def _adjust_captchas_to_order(self):
 	if self.order == 0:
