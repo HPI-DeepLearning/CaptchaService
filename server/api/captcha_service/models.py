@@ -32,7 +32,7 @@ class CaptchaToken(PolymorphicModel):
         self.save()
 
     def __str__(self):
-	return str(self.id) + ", " + self.captcha_type
+	return str(self.id) + ", " + self.captcha_type + ", " + str(self.resolved)
 
 class TextCaptchaToken(CaptchaToken):
     """docstring for TextCaptcha."""
@@ -183,7 +183,7 @@ class ImageCaptchaSession(CaptchaSession):
     #list with stored captcha_token
     image_token_list = SeparatedValuesField() 
     task = models.TextField(null=True)
-		
+
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
@@ -199,7 +199,7 @@ class ImageCaptchaSession(CaptchaSession):
 
 	self.image_token_list = self.get_image_token_list(self.order)
 	url_list = []
-	for i in range(len(self.image_token_list)): 
+	for i in range(len(self.image_token_list)):
 	    url_list.append(self.image_token_list[i].file.url)
 
 	response = JsonResponse({'url_list' : url_list,
@@ -241,8 +241,6 @@ class ImageCaptchaSession(CaptchaSession):
 				 'task' : self.task,
 	                     	'type': 'image'})
 
-
-    
     def get_image_token_list(self, order_list):
 	token_list = []
 	current_token = models.ForeignKey(
@@ -256,13 +254,13 @@ class ImageCaptchaSession(CaptchaSession):
 	#TODO limit choices to resolved/unresolved tokens
 	    if (boolean == True):
 		current_token_index = randint(0,count-1)
-		current_token = image_tokens[current_token_index] 
+		current_token = image_tokens[current_token_index]
 		#choose task randomly by first token
 		if(self.task == None):
 		    self.task = current_token.task
 	    else:
 		count = ImageCaptchaToken.objects.count()
 		current_token_index = randint(0,count-1)
-		current_token = image_tokens[current_token_index]	    
+		current_token = image_tokens[current_token_index]
 	    token_list.append(current_token)
 	return token_list
