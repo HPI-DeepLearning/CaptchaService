@@ -21,29 +21,37 @@ class Command(BaseCommand):
     args = ''
     help = 'populates the db with given captcha tokens'
 
-    def _create_captcha_token(self, file_path, solution, captcha_type):
+    def _create_captcha_token(self, file_path, solution, captcha_type, resolved):
         with open(file_path, 'rb') as f:
             image = f.read()
         file_name = file_path.split('/')[-1]
 	if captcha_type == "text":
 	    token = TextCaptchaToken()
-	    token.create(file_name, image, True, solution)
+	    token.create(file_name, image, resolved, solution)
 	    token.save()
 	elif captcha_type == "image":
 	    token = ImageCaptchaToken()
-	    token.create(file_name, image, True, solution, True)
+	    token.create(file_name, image, resolved, solution, True)
 	    token.save()
 
     def _yield_captcha_data(self):
 	for dataset in DATASETS:
-	    with open(DATA_PATH + dataset[0], 'r') as f:
+	    file_path = DATA_PATH + dataset[0]
+	    num_lines = sum(1 for line in open(file_path)) - 1
+	    with open(file_path, 'r') as f:
 		f.readline() # skip header
-		for line in f:
+		for i, line in enumerate(f):
 		    [file_name, solution] = line.split(';')
 		    file_path = DATA_PATH + dataset[1] + file_name
 		    solution = solution.strip()
-		    yield file_path, solution, dataset[2]
+
+		    if i < num_lines/2:
+			resolved = True
+		    else:
+			resolved = False
+
+		    yield file_path, solution, dataset[2], resolved
 
     def handle(self, *args, **options):
-        for f_path, solution, captcha_type in self._yield_captcha_data():
-            self._create_captcha_token(f_path, solution, captcha_type)
+        for f_path, solution, captcha_type, resolved in self._yield_captcha_data():
+            self._create_captcha_token(f_path, solution, captcha_type, resolved)
