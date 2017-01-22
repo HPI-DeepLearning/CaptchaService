@@ -12,7 +12,7 @@ import uuid
 def request(request):
 
     remote_ip = get_ip(request)
-    session = ImageCaptchaSession()
+    session = TextCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
     return response
@@ -27,7 +27,6 @@ def get_sessions(request):
 
 @api_view(['POST'])
 def validate(request):
-    print request
     params = request.POST
     session_key = params.get('session_key', None)
     session = _retrieve_corresponding_session(session_key, request)
@@ -64,4 +63,4 @@ def _any_parameter_unset(*keys):
         for key in keys:
             if not key:
                 return True
-        return False, ImageCaptchaSession
+        return False 
