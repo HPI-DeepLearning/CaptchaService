@@ -12,7 +12,7 @@ import uuid
 def request(request):
 
     remote_ip = get_ip(request)
-    session = TextCaptchaSession()
+    session = ImageCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
     return response
@@ -41,7 +41,7 @@ def renew(request):
     if _any_parameter_unset(session_key):
         return Response(status=status.HTTP_400_BAD_REQUEST)
     session = _retrieve_corresponding_session(session_key, request)
-    return session.renew(params)
+    return session.renew()
 
 
 def _retrieve_corresponding_session(session_key, request):

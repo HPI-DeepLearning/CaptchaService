@@ -138,7 +138,7 @@ class TextCaptchaSession(CaptchaSession):
 #				 'valid': valid})
 
 
-    def renew(self, params):
+    def renew(self):
         self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
 	first_url, second_url = self._adjust_captchas_to_order()
 	self.save(force_update=True)
@@ -176,26 +176,27 @@ class TextCaptchaSession(CaptchaSession):
 class ImageCaptchaSession(CaptchaSession):
 
     #order is a list with 0->solved_captcha_token, 1->unsolved_captcha_token
-    #since there is ListField in models we store it as JSON
-    order = models.TextField(null=True)
+    order = SeparatedValuesField() # customField for saving lists in django
 
+ 
     #list with stored captcha_token
-    image_token_list = SeparatedValuesField() #customField for saving lists
+    image_token_list = SeparatedValuesField() 
     task = models.TextField(null=True)
 		
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
 	#create order with exactly 4 solved tokens, 0 -> solved, 1 -> unsolved
-	order_list = [1] * 9
+	self.order = [1] * 9
 	i = 0
 	while (i < 4):
 	    index_solved = randint(0,8)
-	    if(order_list[index_solved] == 1):
-		order_list[index_solved] = 0
+	    if(self.order[index_solved] == 1):
+		self.order[index_solved] = 0
 		i += 1
 
-	self.image_token_list = self.get_image_token_list(order_list)
+
+	self.image_token_list = self.get_image_token_list(self.order)
 	url_list = []
 	for i in range(len(self.image_token_list)): 
 	    url_list.append(self.image_token_list[i].file.url)
@@ -203,8 +204,23 @@ class ImageCaptchaSession(CaptchaSession):
 	response = JsonResponse({'url_list' : url_list,
 				 'task' : self.task,
 				 'session_key': self.session_key,
+	                     	 'type': 'image'})
+	return self, response
+
+    def renew(self):
+	self.task = None
+	self.image_token_list = self.get_image_token_list(self.order)
+
+	url_list = []
+	for i in range(len(self.image_token_list)): 
+	    url_list.append(self.image_token_list[i].file.url)
+
+	self.save(force_update=True)
+	return JsonResponse({'url_list' : url_list,
+				 'task' : self.task,
 	                     	'type': 'image'})
-	return self, response	
+
+
     
     def get_image_token_list(self, order_list):
 	token_list = []
@@ -229,4 +245,4 @@ class ImageCaptchaSession(CaptchaSession):
 		current_token_index = randint(0,count-1)
 		current_token = image_tokens[current_token_index]	    
 	    token_list.append(current_token)
-	return token_list	
+	return token_list
