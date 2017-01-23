@@ -35,7 +35,7 @@ var captchaSolved = false,
                 '<div class="captcha-input"><input type="text" placeholder="Answer..."></input></div>' +
                 '<div class="captcha-actions">' +
                     '<a href="#" id="submit">Submit</a>' +
-                    '<a href="#" id="reload"><i class="fa fa-refresh">refresh</i></a>' +
+                    '<a href="#" id="refresh"><i class="fa fa-refresh">refresh</i></a>' +
                 '</div>' +
             '</div>' +
           '</div>' +
@@ -49,6 +49,10 @@ var captchaSolved = false,
             if (!firstImage || !secondImage) {
                 throw new Error('missing text captcha markup!');
             }
+            var captchaContainer = document.querySelectorAll('.captcha-image-container')[0];
+            if (response.session_key){
+                captchaContainer.setAttribute('key', response.session_key);
+            }
             firstImage.setAttribute('src', baseURL + response.first_url);
             secondImage.setAttribute('src', baseURL + response.second_url);
             var setMaxImageDimensions = function (imageOne, imageTwo, fi_w, fi_h, si_w, si_h) {
@@ -60,9 +64,6 @@ var captchaSolved = false,
                     si_dimension = si_w / si_h,
                     fi_resultingWidth = fi_dimension * availableImageWidth / (fi_dimension + si_dimension),
                     si_resultingWidth = availableImageWidth - fi_resultingWidth;
-                console.log(availableImageWidth);
-                console.log(fi_resultingWidth);
-                console.log(si_resultingWidth);
                 imageOne.style.width = '' + fi_resultingWidth + 'px';
                 imageTwo.style.width = '' + si_resultingWidth + 'px';
             }
@@ -92,7 +93,6 @@ captchaReq.onload = function (e) {
     if(captchaReq.status === 200) {
         var xhr = e.target;
         if (xhr.responseType === 'json') {
-            console.log(xhr);
             response = xhr.response;
             handleResponse(response);
         } else {
@@ -149,6 +149,37 @@ var handleResponse = function (response) {
             captchaOverlay.classList.add('show');
             setTimeout(function(){captchaOverlay.classList.add('fadeIn');}, 10);
         }
+    })
+
+    /* 5. Add eventlistener refresh button */
+    var refresh = document.getElementById('refresh');
+    refresh.addEventListener('click', function(e){
+        var captchaContainer = document.querySelectorAll('.captcha-image-container')[0],
+            sessionKey = captchaContainer.getAttribute('key');
+        console.log(sessionKey);
+
+        var renewURL = baseURL + 'captcha/renew';
+        var captchaReq = new XMLHttpRequest();
+        var response = "";
+        captchaReq.open('POST', renewURL, true);
+        captchaReq.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        captchaReq.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        captchaReq.responseType = 'json';
+        captchaReq.onload = function (e) {
+            if(captchaReq.status === 200) {
+                var xhr = e.target;
+                if (xhr.responseType === 'json') {
+                    response = xhr.response;
+                    insertCaptchaData[type](response);
+                } else {
+                    response = JSON.parse(xhr.responseText); // IE bug fix
+                    insertCaptchaData[type](response);
+                }
+            } else {
+              throw new Error('An error occurred during your request: ' +  captchaReq.status + ' ' + captchaReq.statusText);
+            }
+        };
+        captchaReq.send('session_key=' + sessionKey);
     })
 }
 
