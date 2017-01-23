@@ -3,8 +3,13 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    display: none;
-    z-index: 999;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    z-index: -999;
+    opacity: 0;
     right: 0;
     left: 0;
     background: rgba(0,0,0,0);
@@ -16,7 +21,8 @@
 }
 
 .show {
-    display: block;
+    z-index: 999;
+    opacity: 1;
 }
 
 .fadeIn {
@@ -25,14 +31,32 @@
 
 /* Captcha card styles */
 .captcha-card {
-    width: 30%;
+    width: 40%;
+    margin: auto;
+    box-sizing: border-box;
+    background: rgb(69,90,100);
+    background: rgba(69,90,100,.9);
+    border-width: 3px;
+    border-style: solid;
+    -webkit-border-image:
+      -webkit-gradient(linear, 0 0, 0 100%, from(rgb(2,164,153)), to(rgb(199,51,72))) 1 100%;
+    -webkit-border-image:
+      -webkit-linear-gradient(rgb(2,164,153), rgb(199,51,72)) 1 100%;
+    -moz-border-image:
+      -moz-linear-gradient(rgb(2,164,153), rgb(199,51,72)) 1 100%;
+    -o-border-image:
+      -o-linear-gradient(rgb(2,164,153), rgb(199,51,72)) 1 100%;
+    border-image:
+      linear-gradient(to bottom, rgb(2,164,153), rgb(199,51,72)) 1 100%;
+    border-bottom: 3px solid rgb(199,51,72);
+    border-top: 3px solid rgb(2,164,153);
 }
 
 /* Captcha content styles */
 .captcha-content {
+    box-sizing: border-box;
     width: 100%;
     padding: 20px 10px;
-    border-bottom: solid 1px black;
 }
 
 /* Captcha image-container styles */
@@ -48,18 +72,44 @@
 #first-text-token,
 #second-text-token {
     border: 8px solid rgba(0, 0, 0, 0.1);
+    max-width: 100%;
 }
 
 /* Captcha input styles */
 .captcha-input {
+    box-sizing: border-box;
     width: 80%;
+    margin: 0 auto;
+}
+.captcha-input > input {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid #9e9e9e;
+    border-radius: 0;
+    color: white;
+    outline: none;
+    height: 3rem;
+    width: 100%;
+    font-size: 1rem;
+    margin: 0 0 30px 0;
+    padding: 0;
+    box-shadow: none;
+    box-sizing: content-box;
+    transition: all 0.3s;
+}
+.captcha-input > input:focus {
+    border-bottom: 1px solid #26a69a;
+    box-shadow: 0 1px 0 0 #26a69a;
 }
 
 /* Captcha actions styles */
 .captcha-actions {
+    box-sizing: border-box;
     width: 100%;
     padding: 10px 20px;
-    text-align: right
+    text-align: right;
+    border-top: solid 1px #9e9e9e;
+
 }
 
 .captcha-actions a {
