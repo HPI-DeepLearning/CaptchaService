@@ -12,18 +12,11 @@ import uuid
 def request(request):
 
     remote_ip = get_ip(request)
-    session = ImageCaptchaSession()
+    session = TextCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
     return response
 
-@api_view(['GET'])
-def get_sessions(request):
-    # for debugging purpose
-    # CaptchaSession.objects.all().delete()
-    sessions = CaptchaSession.objects.all().values()
-    print(sessions)
-    return Response()
 
 @api_view(['POST'])
 def validate(request):
@@ -45,7 +38,7 @@ def renew(request):
 
 
 def _retrieve_corresponding_session(session_key, request):
-    try: 
+    try:
         session = CaptchaSession.objects.get(pk=session_key)
     except:
         return Response("Session does not exist.", status=status.HTTP_404_NOT_FOUND)
@@ -54,7 +47,7 @@ def _retrieve_corresponding_session(session_key, request):
     if not get_ip(request) == session.origin:
         return Response("ip when opening the session and ip when validating it are not in agreement.",
                         status=status.HTTP_403_FORBIDDEN)
-    
+
     return session
 
 
@@ -63,4 +56,4 @@ def _any_parameter_unset(*keys):
         for key in keys:
             if not key:
                 return True
-        return False 
+        return False
