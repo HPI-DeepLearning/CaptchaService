@@ -72,7 +72,7 @@ ROOT_URLCONF = 'urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'api/templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -92,6 +92,24 @@ AUTHENTICATION_BACKENDS = (
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
+# Password validation
+# https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
 REST_SESSION_LOGIN = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -99,6 +117,7 @@ SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = True
 WSGI_APPLICATION = 'wsgi.application'
 
+ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window
 
 # CORS Headers
 CORS_ORIGIN_ALLOW_ALL = True
@@ -147,3 +166,5 @@ STATICFILES_FINDERS = (
 # Seed Data location
 
 SEED_DATA_PATH = BASE_DIR + '/../'
+
+LOGIN_REDIRECT_URL = 'index'
