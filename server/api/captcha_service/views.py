@@ -15,6 +15,7 @@ def request(request):
     session = ImageCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
+    response = session.validate()
     return response
 
 @api_view(['GET'])

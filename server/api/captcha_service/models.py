@@ -207,6 +207,25 @@ class ImageCaptchaSession(CaptchaSession):
 	                     	 'type': 'image'})
 	return self, response
 
+    def validate(self, params):
+	result = params.get('result', None)
+
+	#TODO catch exceptions like TextCaptchaSession.validate
+	
+	valid = True
+	for index, element in enumerate(self.order):
+	    if(element == 0):
+		if not (result[index] == self.image_token_list[index].result):
+		    valid = False
+	
+	if (valid == True):
+	    for index, element in enumerate(self.order):
+		if (element == 1):
+		    self.image_token_list[index].add_proposal(result[index])
+
+	return JsonResponse({'valid' : valid})
+	
+
     def renew(self):
 	self.task = None
 	self.image_token_list = self.get_image_token_list(self.order)
