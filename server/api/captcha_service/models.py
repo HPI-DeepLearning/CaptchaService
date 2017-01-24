@@ -71,6 +71,14 @@ class CaptchaSession(PolymorphicModel):
 	self.origin = remote_ip
 	self.session_type = session_type
 
+    def _any_parameter_unset(*keys):
+
+	for key in keys:
+            if not key:
+                return True
+        return False
+
+
 class TextCaptchaSession(CaptchaSession):
 
     solved_captcha = models.ForeignKey(
@@ -157,13 +165,6 @@ class TextCaptchaSession(CaptchaSession):
         second = text_tokens[second_captcha_index]
         return first, second
 
-    def _any_parameter_unset(*keys):
-
-	for key in keys:
-            if not key:
-                return True
-        return False
-
     def _adjust_captchas_to_order(self):
 	if self.order == 0:
                 first_url = self.solved_captcha.file.url
@@ -210,8 +211,9 @@ class ImageCaptchaSession(CaptchaSession):
     def validate(self, params):
 	result = params.get('result', None)
 
-	#TODO catch exceptions like TextCaptchaSession.validate
-	
+	if self._any_parameter_unset(self.session_key, result):
+	    return Response(status=status.HTTP_400_BAD_REQUEST)
+
 	valid = True
 	for index, element in enumerate(self.order):
 	    if(element == 0):
@@ -246,7 +248,6 @@ class ImageCaptchaSession(CaptchaSession):
 	current_token = models.ForeignKey(
         ImageCaptchaToken,
         on_delete=models.PROTECT,
-        #  limit_choices_to={'resolved': True},
     )
 
 	image_tokens = ImageCaptchaToken.objects.all()

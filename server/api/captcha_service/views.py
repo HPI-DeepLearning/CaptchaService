@@ -12,10 +12,9 @@ import uuid
 def request(request):
 
     remote_ip = get_ip(request)
-    session = ImageCaptchaSession()
+    session = TextCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
-    response = session.validate()
     return response
 
 @api_view(['GET'])
