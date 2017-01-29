@@ -4,7 +4,6 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="{{ STATIC_URL }}style.css" />
     <title>{% block title %}User test{% endblock %}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,6 +12,7 @@
     <!-- Le styles -->
     <!-- <link rel="shortcut icon" href="ico/favicon.ico"> -->
     <link href="{{ STATIC_URL }}materialize/css/materialize.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ STATIC_URL }}style.css" />
   </head>
 
 <body>
@@ -25,6 +25,7 @@
             {% if user.is_authenticated %}
                 <li><a href="{% url 'auth_logout' %}">{% trans "Log out" %}</a></li>
                 <li><a href="{% url 'auth_password_change' %}">{% trans "Change password" %}</a></li>
+                <li><a href="{% url 'upload' %}">{% trans "Upload" %}</a></li>
             {% else %}
                <li><a href="{% url 'auth_login' %}">{% trans "Log in" %}</a></li>
             {% endif %}
@@ -39,13 +40,37 @@
         <div class="page-header">
             <h1>{{ site.name }} <small>{% trans "Captcha Service" %}</small></h1>
         </div>
-
     {% endblock %}
     </div>
 </main>
 </body>
 
-<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+<script src="{{ STATIC_URL }}jquery-2.1.1.min.js"></script>
 <script src="{{ STATIC_URL }}/materialize/js/materialize.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.modal').modal();
+        $('select').material_select();
+    });
+</script>
+<script>
+    $('input[name=captchatype]').on('change', function(e) {
+        if ($('input[name="captchatype"]:checked').val() == "imagecaptcha") {
+            document.getElementById("imagetask").style.display="block";
+        } else {
+            document.getElementById("imagetask").style.display="none";
+        }
+    });
 
+    $("#addtaskbtn").click(function() {
+        var taskname = $("#taskname").val();
+        $("#taskselect").append(
+            $("<option></option>")
+                .attr("value",taskname)
+                .text(taskname)
+        );
+        $('select').material_select();
+    });
+
+</script>
 </html>

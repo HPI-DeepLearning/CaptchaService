@@ -2,5 +2,9 @@
 {% load i18n %}
 
 {% block content %}
-This is our homepage.
+{% if user.is_authenticated %}
+	Hi {{ user.username }}!
+{% else %}
+   Please log in or register.
+{% endif %}
 {% endblock %}

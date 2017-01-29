@@ -5,7 +5,7 @@ Installation
 
 Install with pip::
 
-    pip install -r requirements.txt (run with sudo)
+    (sudo) pip install -r requirements.txt
     # create encryption keys for captcha results
     mkdir keys
     keyczart create --location=keys --purpose=crypt
