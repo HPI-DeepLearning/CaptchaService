@@ -30,6 +30,31 @@
 		    </div>
 		</div>
 	</div>
+
+	<div class="row" id="textform">
+		<div class="col s5 m4 l3">
+		    <p>
+				<input name="textsolution" type="radio" id="unsolved" value="unsolved" checked />
+				<label for="unsolved">Unsolved</label>
+		    </p>
+		    <p>
+		  		<input name="textsolution" type="radio" id="solved" value="solved" />
+		      	<label for="solved">Solved</label>
+			</p>
+		</div>
+		<div class="col s7 m8 l9" id="textsolutionupload" style="display: none">
+		    <div class="file-field input-field">
+		      	<div class="btn">
+		    		<span>File</span>
+		    		<input type="file">
+		    	</div>
+		    	<div class="file-path-wrapper">
+		    		<input class="file-path validate" type="text" placeholder="Upload a txt file for your text captcha solutions">
+		    	</div>
+		    </div>
+		</div>	
+	</div>
+
 	<div class="row" id="imagetask" style="display: none">
 		<div class="col s5 m4 l3">
 			<a class="waves-effect waves-light btn" href="#newtask">Add new task</a>
