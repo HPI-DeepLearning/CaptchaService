@@ -6,7 +6,8 @@
 	<h4>Upload new captchas</h4>
 </div>
 
-<form action="file_upload">
+<form action="../captcha/upload", method="post", enctype="multipart/form-data" >
+	{% csrf_token %}
 	<div class="row">
 		<div class="col s12 m6 l3">
 		    <p>
@@ -35,7 +36,7 @@
 		    <div class="file-field input-field">
 		      <div class="btn">
 		        <span>Captcha files</span>
-		        <input type="file" multiple>
+		        <input name="files" type="file" value="captchafiles">
 		      </div>
 		      <div class="file-path-wrapper">
 		        <input class="file-path validate" type="text" placeholder="Upload one or more zip / tar files">

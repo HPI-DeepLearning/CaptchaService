@@ -52,7 +52,7 @@ class ImageCaptchaToken(CaptchaToken):
     task = models.CharField(max_length=128)
     result = models.BooleanField(default=False)
 
-    def create(self, file_name, file_data, resolved, task, result=''):
+    def create(self, file_name, file_data, resolved, task, result=False): 
         super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
 	self.task = task
         self.result = result
