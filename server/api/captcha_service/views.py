@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.core.management import call_command
 from rest_framework.response import Response
@@ -47,6 +48,7 @@ def upload(request):
     params = request.POST
     captchatype = params.get('captchatype', None)
     solved = params.get('textsolution', None) 
+    task = params.get('task', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
     #TODO task   
@@ -90,8 +92,7 @@ def upload(request):
     
     call_command('collectstatic', verbosity=0, interactive=False)
     shutil.rmtree('temp') 
-    return Response("hdoiasjd")
-
+    return HttpResponseRedirect('/') 
 
 def _retrieve_corresponding_session(session_key, request):
     try:
@@ -107,6 +108,7 @@ def _retrieve_corresponding_session(session_key, request):
     return session
 
 def _yield_captcha_solutions():
+    #TODO try/catch if txt exists
     with open('temp/captchas.txt', 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
