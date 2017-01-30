@@ -26,7 +26,7 @@ Challenge2_Training_Task1_GT
 **/migrations
 
 # static file dirs
-**/static
+server/static
 
 
 # Distribution / packaging
