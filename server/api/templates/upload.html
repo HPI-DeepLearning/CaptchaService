@@ -46,39 +46,14 @@
 	</div>
 
 	<div class="row" id="imagetask" style="display: none">
-		<div class="col s5 m4 l3">
-			<a class="waves-effect waves-light btn" href="#newtask">Add new task</a>
-		</div>
-		<div class="col s7 m8 l9">
-			<div class="input-field">
-			    <select id="taskselect">
-		      		<option value="" disabled selected>Choose your task</option>
-	      			<option value="brontosaurus">brontosaurus</option>
-		      			<option value="Platypus">Platypus</option>
-			    </select>
-			    <label>Image Task</label>
-		  	</div>
-		</div>
-	</div>
+		<div class="input-field col s6">
+        	<input name="task" placeholder="Platypus" id="task" type="text" class="validate">
+        	<label for="task">What is the user's task?</label>
+        </div>
+    </div>
 
 	<button class="btn waves-effect waves-light right" type="submit" name="action">Submit
     	<i class="material-icons right">send</i>
   	</button>
 </form>
-
-<!-- New task modal -->
-<div id="newtask" class="modal">
-	<div class="modal-content">
-  		<h4>Name for new image task</h4>
-  		<p>What are users supposed to identify in your image captcha?</p>
-  		<p>Please enter one keyword</p>
-        <div class="input-field">
-			<input id="taskname" type="text" class="validate">
-        	<label for="taskname">Task Name</label>
-        </div>
-	</div>
-	<div class="modal-footer">
-  		<button id="addtaskbtn" class="modal-action modal-close waves-effect waves-green btn-flat">Add new task</button>
-	</div>
-</div>
 {% endblock %}
