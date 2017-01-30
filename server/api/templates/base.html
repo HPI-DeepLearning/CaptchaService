@@ -55,21 +55,11 @@
     });
 </script>
 <script>
-    $('input[name=textsolution]').on('change', function(e) {
-        if ($('input[name=textsolution]:checked').val() == "solved") {
-            document.getElementById("textsolutionupload").style.display="block";
-        } else {
-            document.getElementById("textsolutionupload").style.display="none";
-        }
-    });
-
     $('input[name=captchatype]').on('change', function(e) {
         if ($('input[name=captchatype]:checked').val() == "imagecaptcha") {
             document.getElementById("imagetask").style.display="block";
-            document.getElementById("textform").style.display="none";
         } else {
             document.getElementById("imagetask").style.display="none";
-            document.getElementById("textform").style.display="block";
         }
     });
 
