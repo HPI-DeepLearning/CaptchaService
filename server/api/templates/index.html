@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+{% if user.is_authenticated %}
+	Hi {{ user.username }}!
+{% else %}
+   Please log in or register.
+{% endif %}
+{% endblock %}

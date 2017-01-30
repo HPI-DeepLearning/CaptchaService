@@ -1,12 +1,17 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+from django.core.management import call_command
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from ipware.ip import get_ip
-from .models import CaptchaToken, CaptchaSession, TextCaptchaSession, ImageCaptchaSession
+from .models import CaptchaToken, CaptchaSession, TextCaptchaSession, ImageCaptchaSession, ImageCaptchaToken, TextCaptchaToken
 from random import randint
+from PIL import Image
 import uuid
+import zipfile
+import shutil
+import os
 
 @api_view(['GET'])
 def request(request):
@@ -37,6 +42,57 @@ def renew(request):
     return session.renew()
 
 
+@api_view(['POST'])
+def upload(request):
+    params = request.POST
+    captchatype = params.get('captchatype', None)
+    solved = params.get('textsolution', None) 
+    captchafile = request.FILES
+    data_folder = captchafile.get('files', None)
+    #TODO task   
+ 
+    #TODO test if its zipfile
+    zf = zipfile.ZipFile(data_folder, 'r')
+    try:
+	zf.extractall('temp')
+    except KeyError:
+	print 'Error: Could not extract Zip'
+
+    path = 'temp/captchas/'
+    listing = os.listdir(path)
+
+    if (solved == "unsolved"):
+	for file in listing:
+	    im = open(path + file, 'rb')
+	    image_data = im.read()
+	    im.close()
+	    if (captchatype == 'imagecaptcha'):
+		token = ImageCaptchaToken()
+	        token.create(file, image_data, 0, "testtask7") #TODO task
+	    elif (captchatype == 'textcaptcha'):
+		token = TextCaptchaToken()
+	        token.create(file, image_data, 0, 'testtext') 
+	    token.save()
+    elif (solved == "solved"):
+	for file_name, solution in _yield_captcha_solutions():
+	    im = open(path + file_name, 'rb')
+	    image_data = im.read()
+	    im.close()
+	    if (captchatype == 'imagecaptcha'):
+		token = ImageCaptchaToken()
+		token.create(file_name, image_data, 1, "testtask8", solution=='1') #TODO task, solution=='1' evaluates to bool True
+		print solution
+	    elif (captchatype == 'textcaptcha'):
+		token = TextCaptchaToken()
+		token.create(file_name, image_data, 1, solution)
+	    token.save()	
+
+    
+    call_command('collectstatic', verbosity=0, interactive=False)
+    shutil.rmtree('temp') 
+    return Response("hdoiasjd")
+
+
 def _retrieve_corresponding_session(session_key, request):
     try:
         session = CaptchaSession.objects.get(pk=session_key)
@@ -50,6 +106,12 @@ def _retrieve_corresponding_session(session_key, request):
 
     return session
 
+def _yield_captcha_solutions():
+    with open('temp/captchas.txt', 'r') as f:
+        for line in f:
+    	    [file_name, solution] = line.split(';')
+	    solution = solution.strip()
+	    yield file_name, solution
 
 
 def _any_parameter_unset(*keys):

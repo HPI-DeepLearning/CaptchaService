@@ -52,7 +52,7 @@ class ImageCaptchaToken(CaptchaToken):
     task = models.CharField(max_length=128)
     result = models.BooleanField(default=False)
 
-    def create(self, file_name, file_data, resolved, task, result=''):
+    def create(self, file_name, file_data, resolved, task, result=False): 
         super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
 	self.task = task
         self.result = result
@@ -70,6 +70,14 @@ class CaptchaSession(PolymorphicModel):
 	self.session_key = uuid.uuid4()
 	self.origin = remote_ip
 	self.session_type = session_type
+
+    def _any_parameter_unset(*keys):
+
+	for key in keys:
+            if not key:
+                return True
+        return False
+
 
 class TextCaptchaSession(CaptchaSession):
 
@@ -157,13 +165,6 @@ class TextCaptchaSession(CaptchaSession):
         second = text_tokens[second_captcha_index]
         return first, second
 
-    def _any_parameter_unset(*keys):
-
-	for key in keys:
-            if not key:
-                return True
-        return False
-
     def _adjust_captchas_to_order(self):
 	if self.order == 0:
                 first_url = self.solved_captcha.file.url
@@ -207,6 +208,26 @@ class ImageCaptchaSession(CaptchaSession):
 	                     	 'type': 'image'})
 	return self, response
 
+    def validate(self, params):
+	result = params.get('result', None)
+
+	if self._any_parameter_unset(self.session_key, result):
+	    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+	valid = True
+	for index, element in enumerate(self.order):
+	    if(element == 0):
+		if not (result[index] == self.image_token_list[index].result):
+		    valid = False
+	
+	if (valid == True):
+	    for index, element in enumerate(self.order):
+		if (element == 1):
+		    self.image_token_list[index].add_proposal(result[index])
+
+	return JsonResponse({'valid' : valid})
+	
+
     def renew(self):
 	self.task = None
 	self.image_token_list = self.get_image_token_list(self.order)
@@ -227,7 +248,6 @@ class ImageCaptchaSession(CaptchaSession):
 	current_token = models.ForeignKey(
         ImageCaptchaToken,
         on_delete=models.PROTECT,
-        #  limit_choices_to={'resolved': True},
     )
 
 	image_tokens = ImageCaptchaToken.objects.all()
