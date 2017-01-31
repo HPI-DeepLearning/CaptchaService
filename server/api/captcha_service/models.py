@@ -32,18 +32,34 @@ class CaptchaToken(PolymorphicModel):
         self.save()
 
     def __str__(self):
-	return str(self.id) + ", " + self.captcha_type
+	return str(self.id) + ", " + self.captcha_type + ", " + str(self.resolved)
 
 class TextCaptchaToken(CaptchaToken):
     """docstring for TextCaptcha."""
 
     result = EncryptedCharField(max_length=256)
+    insolvable = models.BooleanField(default=False)
 
-    def create(self, file_name, file_data, resolved, result=''):
+    def create(self, file_name, file_data, resolved, result='', insolvable=False):
         super(TextCaptchaToken, self).create(file_name, file_data, resolved)
         self.result = result
         self.captcha_type = "text"
         return self
+
+    def try_solve(self):
+	proposals = self.proposals
+	most_common = proposals.most_common()
+	num_proposoals = sum(proposals.values())
+
+	if num_proposoals >= 6:
+	    self.insolvable = True
+	    self.resolved = True
+	    self.save()
+	elif num_proposoals >= 3:
+	    if most_common[0][1] >= 3:
+		self.resolved = True
+		self.result = most_common[0][0]
+		self.save()
 
 class ImageCaptchaToken(CaptchaToken):
 
@@ -58,6 +74,21 @@ class ImageCaptchaToken(CaptchaToken):
         self.result = result
         self.captcha_type = "image"
 	return self
+
+    def try_solve(self):
+	proposals = self.proposals
+	most_common = proposals.most_common()
+	num_proposoals = sum(proposals.values())
+
+	if num_proposoals >= 6:
+	    self.insolvable = True
+	    self.resolved = True
+	    self.save()
+	elif num_proposoals >= 4:
+	    if most_common[0][1] >= 4:
+		self.resolved = True
+		self.result = most_common[0][0]
+		self.save()
 
 class CaptchaSession(PolymorphicModel):
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
@@ -111,6 +142,20 @@ class TextCaptchaSession(CaptchaSession):
 
 	return self, response
 
+#    def try_solve(self):
+#	proposals = self.unsolved_captcha.proposals
+#	most_common = proposals.most_common()
+#	num_proposoals = sum(proposals.values())
+#
+#	if num_proposoals >= 6:
+#	    self.unsolved_captcha.insolvable = True
+#	    self.unsolved_captcha.resolved = True
+#	    self.unsolved_captcha.save()
+##	elif num_proposoals >= 3:
+#	    if most_common[0][1] >= 3:
+#		self.unsolved_captcha.resolved = True
+#		self.unsolved_captcha.result = most_common[0][0]
+#		self.unsolved_captcha.save()
 
     def validate(self, params):
         result = params.get('result', None).strip()
@@ -123,13 +168,16 @@ class TextCaptchaSession(CaptchaSession):
 	# validate input
 	if self.order == 0 and self.solved_captcha.result.strip() == first_result.strip() or self.order == 1 and self.solved_captcha.result.strip() == second_result.strip():
 
-	   valid = True
-	   if self.order == 0:
-	       self.unsolved_captcha.add_proposal(second_result.strip())
-	   else:
-	       self.unsolved_captcha.add_proposal(first_result.strip())
+	    valid = True
+	    if self.order == 0:
+		self.unsolved_captcha.add_proposal(second_result.strip())
+	    else:
+		self.unsolved_captcha.add_proposal(first_result.strip())
 
-	   self.delete()
+	    self.unsolved_captcha.try_solve()
+
+	    self.delete()
+
 
         else:
            valid = False
@@ -156,12 +204,12 @@ class TextCaptchaSession(CaptchaSession):
     @staticmethod
     def _get_random_captcha_pair():
         # get unsolved captcha_token
-        text_tokens = TextCaptchaToken.objects.all().filter(resolved=0)
+        text_tokens = TextCaptchaToken.objects.all().filter(resolved=True, insolvable =False)
 	count = text_tokens.count()
 	unsolved_captcha_index = randint(0, count-1)
         unsolved = text_tokens[unsolved_captcha_index]
 	# get solved captcha_token
-        text_tokens = TextCaptchaToken.objects.all().filter(resolved=1)
+        text_tokens = TextCaptchaToken.objects.all().filter(resolved=False)
 	count = text_tokens.count()
 	solved_captcha_index = randint(0, count-1)
         solved = text_tokens[solved_captcha_index]
@@ -184,7 +232,7 @@ class ImageCaptchaSession(CaptchaSession):
     #list with stored captcha_token
     image_token_list = SeparatedValuesField() 
     task = models.TextField(null=True)
-		
+
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
@@ -205,7 +253,7 @@ class ImageCaptchaSession(CaptchaSession):
 	
 	self.image_token_list = self.get_image_token_list(self.order)
 	url_list = []
-	for i in range(len(self.image_token_list)): 
+	for i in range(len(self.image_token_list)):
 	    url_list.append(self.image_token_list[i].file.url)
 
 	response = JsonResponse({'url_list' : url_list,
@@ -230,6 +278,7 @@ class ImageCaptchaSession(CaptchaSession):
 	    for index, element in enumerate(self.order):
 		if (element == 1):
 		    self.image_token_list[index].add_proposal(result[index])
+		    self.image_token_list[index].try_solve()
 
 	return JsonResponse({'valid' : valid})
 	
@@ -247,8 +296,6 @@ class ImageCaptchaSession(CaptchaSession):
 				 'task' : self.task,
 	                     	'type': 'image'})
 
-
-    
     def get_image_token_list(self, order_list):
 	token_list = []
 	current_token = models.ForeignKey(
@@ -257,6 +304,7 @@ class ImageCaptchaSession(CaptchaSession):
     )
 
 	for boolean in order_list:
+<<<<<<< HEAD
 	    if (boolean == 1):
 		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
 	    else:

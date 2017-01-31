@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+{% if user.is_authenticated %}
+	<form action="../captcha/download", method="get", enctype="multipart/form-data" >
+		{% csrf_token %}
+		<div class="row">
+			<h5>Select which captcha type you would like to download.</h5>
+			<div class="col s12 m6 l3">
+			    <p>
+			  		<input name="captchatype" type="radio" id="textcaptcha" value="textcaptcha" checked />
+			      	<label for="textcaptcha">Text-Captcha</label>
+				</p>
+			    <p>
+					<input name="captchatype" type="radio" id="imagecaptcha" value="imagecaptcha" />
+					<label for="imagecaptcha">Image-Captcha</label>
+			    </p>
+			</div>
+		</div>
+		
+		<div class="row">
+			<h5>Choose the status of the captchas.</h5>
+			<div class="col s12 m6 l3">
+				<p>
+					<input name="textsolution" type="radio" id="unsolved" value="unsolved" checked />
+					<label for="unsolved">Unsolved</label>
+				</p>
+				<p>
+					<input name="textsolution" type="radio" id="solved" value="solved" />
+					<label for="solved">Solved</label>
+				</p>
+				<p>
+					<input name="textsolution" type="radio" id="both" value="both" />
+					<label for="both">Solved & Unsolved</label>
+				</p>
+			</div>
+		</div>
+
+		<div class="row" id="imagetask" style="display: none">
+			<div class="col s7 m8 l9">
+				<div class="input-field">
+				    <select id="task" name="task">
+			      		<option value="" disabled selected>Choose your task</option>
+		      			<option value="brontosaurus">brontosaurus</option>
+		      			<option value="Platypus">Platypus</option>
+				    </select>
+				    <label>Image Task</label>
+			  	</div>
+			</div>
+	    </div>
+
+		<button class="btn waves-effect waves-light right" type="submit" name="action">Download
+	    	<i class="material-icons right">file_download</i>
+	  	</button>
+	</form>
+{% else %}
+	<div class="center">
+		<h4>Please log in or register.</h4>
+	</div>
+{% endif %}
+{% endblock %}
