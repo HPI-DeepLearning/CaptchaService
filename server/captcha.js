@@ -4,24 +4,6 @@
 *                     - form button must have ID "captcha-button"
 *
 */
-var oldOverlay = '<div class="overlay"><div class="valign card blue-grey darken-2 hoverable">' +
-   '<div class="card-image" style="display: flex; justify-content: space-around; padding: 20px 3%;">' +
-         '<img id="first" style="width: 40%; border: 8px solid rgba(0, 0, 0, 0.1);" src="">' +
-         '<img id="second" style="width: 40%; border: 8px solid rgba(0, 0, 0, 0.1);" src="">' +
-         '<span class="card-title"></span>' +
-       '</div>' +
-       '<div class="card-content row" style="padding: 0 15px">' +
-           '<div class="input-field col s12">' +
-       '<i class="material-icons prefix">keyboard</i>' +
-       '<input id="icon_prefix" type="text" class="validate input">' +
-       '<label for="icon_prefix">Solution</label>' +
-     '</div>' +
-       '</div>' +
-       '<div class="card-action right-align">' +
-         '<a id="submit" href="">Submit</a>' +
-         '<a id="reload" href=""><i class="material-icons" style="font-size: 1.2rem">refresh</i></a>' +
-       '</div>' +
-'</div></div>';
 
 var captchaSolved = false,
     HTMLOverlay = {
@@ -40,7 +22,21 @@ var captchaSolved = false,
             '</div>' +
           '</div>' +
         '</div>',
-        image: ''
+        image: '<div class="overlay"><div class="captcha-card"><div class="captcha-content"><div class="task"><p></p></div>' +
+                '<div class="captcha-image-container" id="image-captcha">' +
+                    '<input name="captcha" type="checkbox" id="image1" class="input"/><label for="image1" class="label" ><img alt="captcha_image1"></label>' +
+                    '<input name="captcha" type="checkbox" id="image2" class="input"/><label for="image2" class="label" ><img alt="captcha_image2"></label>' +
+                    '<input name="captcha" type="checkbox" id="image3" class="input"/><label for="image3" class="label" ><img alt="captcha_image3"></label>' +
+                    '<input name="captcha" type="checkbox" id="image4" class="input"/><label for="image4" class="label" ><img alt="captcha_image4"></label>' +
+                    '<input name="captcha" type="checkbox" id="image5" class="input"/><label for="image5" class="label" ><img alt="captcha_image5"></label>' +
+                    '<input name="captcha" type="checkbox" id="image6" class="input"/><label for="image6" class="label" ><img alt="captcha_image6"></label>' +
+                    '<input name="captcha" type="checkbox" id="image7" class="input"/><label for="image7" class="label" ><img alt="captcha_image7"></label>' +
+                    '<input name="captcha" type="checkbox" id="image8" class="input"/><label for="image8" class="label" ><img alt="captcha_image8"></label>' +
+                    '<input name="captcha" type="checkbox" id="image9" class="input"/><label for="image9" class="label" ><img alt="captcha_image9"></label>' +
+                '</div></div>' +
+                '<div class="captcha-actions">' +
+                    '<a href="#" id="submit">Submit</a><a href="#" id="refresh"><i class="fa fa-refresh">refresh</i></a>' +
+                '</div></div></div>'
     },
     insertCaptchaData = {
         text: function (response) {
@@ -77,7 +73,38 @@ var captchaSolved = false,
             }
         },
         image: function(response) {
-            // TODO
+            if(!response.url_list){
+                throw new Error('Captcha response invalid. Captcha url\'s are missing!');
+            }
+            // uncheck all previously checked checkboxes
+            var checkboxes = document.querySelectorAll('.captcha-image-container > .input');
+            checkboxes.forEach(function(el) {
+                el.checked = false;
+            });
+            
+            var captchaContainer = document.querySelectorAll('.captcha-image-container')[0];
+            if (response.session_key){
+                captchaContainer.setAttribute('key', response.session_key);
+            }
+            var imgElements = document.querySelectorAll('.input ~ label img')
+            for(i = 0; i < 9; i++) {
+                var imgElement = imgElements[i];
+                if (!imgElement) {
+                    throw new Error('Img element is missing in markup!');
+                }
+                imgElement.setAttribute('src', baseURL + response.url_list[i]);
+            }
+            // calculate tile size - independent of screen size there should be 3x3 tiles rendered
+            var container = document.getElementsByClassName('captcha-image-container')[0],
+                availableSpace = container.clientWidth,
+                tileWidth = (availableSpace - 20) / 3 - 20; //20 px padding(left and right) and 10px space between tiles
+
+            var labelElements = document.querySelectorAll('.captcha-image-container .input ~ label');
+            for(i = 0; i < 9; i++) {
+                //size each label element
+                labelElements[i].style.width = '' + tileWidth + 'px';
+                labelElements[i].style.height = '' + tileWidth + 'px';
+            }
         }
     }
 
@@ -94,6 +121,7 @@ captchaReq.onload = function (e) {
         var xhr = e.target;
         if (xhr.responseType === 'json') {
             response = xhr.response;
+            console.log(response);
             handleResponse(response);
         } else {
             response = JSON.parse(xhr.responseText); // IE bug fix
@@ -156,7 +184,6 @@ var handleResponse = function (response) {
     refresh.addEventListener('click', function(e){
         var captchaContainer = document.querySelectorAll('.captcha-image-container')[0],
             sessionKey = captchaContainer.getAttribute('key');
-        console.log(sessionKey);
 
         var renewURL = baseURL + 'captcha/renew';
         var captchaReq = new XMLHttpRequest();
@@ -180,30 +207,24 @@ var handleResponse = function (response) {
             }
         };
         captchaReq.send('session_key=' + sessionKey);
-    })
+    });
+
+    // click on overlay should hide captcha card
+    var captchaOverlay = document.getElementsByClassName('overlay')[0];
+    captchaOverlay.addEventListener('click', function(e){
+        captchaOverlay.classList.remove('fadeIn');
+        captchaOverlay.classList.remove('show');
+    });
+    var captchaCard = document.getElementsByClassName('captcha-card')[0];
+    captchaCard.addEventListener('click', function(e){
+        e.stopPropagation();
+    });
 }
 
 // 4. POST Form on validation and secrect key generated by Web Service
 
 
 /*
-$('#reload').on('click', function(e) {
-    e.preventDefault();
-    var session_key = $('.card').attr('key');
-    console.log(session_key);
-    $.ajax('http://localhost:8000/captcha/renew', {
-        data: {session_key: session_key},
-        dataType: 'json',
-        type: 'POST',
-        success: function(data) {
-            var host = 'http://localhost:8000/'
-            var first_url =  host + data.first_url;
-            var second_url =  host + data.second_url;
-            $('#first').attr('src', first_url);
-            $('#second').attr('src', second_url);
-        }
-    })
-});
 
 $('#submit').on('click', function(e) {
     e.preventDefault();

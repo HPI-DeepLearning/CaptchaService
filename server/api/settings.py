@@ -48,7 +48,8 @@ INSTALLED_APPS = (
     # allauth
     'allauth',
     'allauth.account',
-    'rest_auth.registration',
+    # 'rest_auth.registration',
+    'registration',
     # cors headers
     'corsheaders',
     'polymorphic',
