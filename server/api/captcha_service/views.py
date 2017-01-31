@@ -17,7 +17,7 @@ import os
 def request(request):
 
     remote_ip = get_ip(request)
-    session = TextCaptchaSession()
+    session = ImageCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
     return response
