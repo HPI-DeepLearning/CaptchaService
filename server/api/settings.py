@@ -125,6 +125,7 @@ EMAIL_USE_TLS = True
 
 SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 WSGI_APPLICATION = 'wsgi.application'
 
 ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window
