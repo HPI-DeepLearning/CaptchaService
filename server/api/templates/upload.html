@@ -2,58 +2,62 @@
 {% load i18n %}
 
 {% block content %}
-<div class="center">
-	<h4>Upload new captchas</h4>
-</div>
-
-<form action="../captcha/upload", method="post", enctype="multipart/form-data" >
-	{% csrf_token %}
-	<div class="row">
-		<div class="col s12 m6 l3">
-		    <p>
-		  		<input name="captchatype" type="radio" id="textcaptcha" value="textcaptcha" checked />
-		      	<label for="textcaptcha">Text-Captcha</label>
-			</p>
-		    <p>
-				<input name="captchatype" type="radio" id="imagecaptcha" value="imagecaptcha" />
-				<label for="imagecaptcha">Image-Captcha</label>
-		    </p>
-		</div>
-
-		<div class="col s12 m6 l2">
-		    <p>
-				<input name="textsolution" type="radio" id="unsolved" value="unsolved" checked />
-				<label for="unsolved">Unsolved</label>
-		    </p>
-		    <p>
-		  		<input name="textsolution" type="radio" id="solved" value="solved" />
-		      	<label for="solved">Solved</label>
-			</p>
-		</div>
-
-
-		<div class="col s12 m12 l7">
-		    <div class="file-field input-field">
-		      <div class="btn">
-		        <span>Captcha files</span>
-		        <input name="files" type="file" value="captchafiles">
-		      </div>
-		      <div class="file-path-wrapper">
-		        <input class="file-path validate" type="text" placeholder="Upload one or more zip / tar files">
-		      </div>
-		    </div>
-		</div>
+{% if user.is_authenticated %}
+	<div class="center">
+		<h4>Upload new captchas</h4>
 	</div>
 
-	<div class="row" id="imagetask" style="display: none">
-		<div class="input-field col s6">
-        	<input name="task" placeholder="Platypus" id="task" type="text" class="validate">
-        	<label for="task">What is the user's task?</label>
-        </div>
-    </div>
+	<form action="../captcha/upload", method="post", enctype="multipart/form-data" >
+		{% csrf_token %}
+		<div class="row">
+			<div class="col s12 m6 l3">
+			    <p>
+			  		<input name="captchatype" type="radio" id="textcaptcha" value="textcaptcha" checked />
+			      	<label for="textcaptcha">Text-Captcha</label>
+				</p>
+			    <p>
+					<input name="captchatype" type="radio" id="imagecaptcha" value="imagecaptcha" />
+					<label for="imagecaptcha">Image-Captcha</label>
+			    </p>
+			</div>
 
-	<button class="btn waves-effect waves-light right" type="submit" name="action">Submit
-    	<i class="material-icons right">send</i>
-  	</button>
-</form>
+			<div class="col s12 m6 l2">
+			    <p>
+					<input name="textsolution" type="radio" id="unsolved" value="unsolved" checked />
+					<label for="unsolved">Unsolved</label>
+			    </p>
+			    <p>
+			  		<input name="textsolution" type="radio" id="solved" value="solved" />
+			      	<label for="solved">Solved</label>
+				</p>
+			</div>
+
+
+			<div class="col s12 m12 l7">
+			    <div class="file-field input-field">
+			      <div class="btn">
+			        <span>Captcha files</span>
+			        <input name="files" type="file" value="captchafiles">
+			      </div>
+			      <div class="file-path-wrapper">
+			        <input class="file-path validate" type="text" placeholder="Upload one or more zip / tar files">
+			      </div>
+			    </div>
+			</div>
+		</div>
+
+		<div class="row" id="imagetask" style="display: none">
+			<div class="input-field col s6">
+	        	<input name="task" placeholder="Platypus" id="task" type="text" class="validate">
+	        	<label for="task">What is the user's task?</label>
+	        </div>
+	    </div>
+
+		<button class="btn waves-effect waves-light right" type="submit" name="action">Submit
+	    	<i class="material-icons right">send</i>
+	  	</button>
+	</form>
+{% else %}
+   Please log in or register.
+{% endif %}
 {% endblock %}
