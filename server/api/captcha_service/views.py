@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from ipware.ip import get_ip
 from .models import CaptchaToken, CaptchaSession, TextCaptchaSession, ImageCaptchaSession, ImageCaptchaToken, TextCaptchaToken
-from random import randint
+from random import randint, choice
 from PIL import Image
 import uuid
 import zipfile
@@ -17,7 +17,8 @@ import os
 def request(request):
 
     remote_ip = get_ip(request)
-    session = ImageCaptchaSession()
+    sessions = [ImageCaptchaSession, TextCaptchaSession]
+    session = choice(sessions)() # random choice
     session, response = session.create(remote_ip)
     session.save()
     return response
@@ -46,11 +47,11 @@ def renew(request):
 def upload(request):
     params = request.POST
     captchatype = params.get('captchatype', None)
-    solved = params.get('textsolution', None) 
+    solved = params.get('textsolution', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
-    #TODO task   
- 
+    #TODO task
+
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
     try:
@@ -71,7 +72,7 @@ def upload(request):
 	        token.create(file, image_data, 0, "testtask7") #TODO task
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
-	        token.create(file, image_data, 0, 'testtext') 
+	        token.create(file, image_data, 0, 'testtext')
 	    token.save()
     elif (solved == "solved"):
 	for file_name, solution in _yield_captcha_solutions():
@@ -85,11 +86,11 @@ def upload(request):
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
-	    token.save()	
+	    token.save()
 
-    
+
     call_command('collectstatic', verbosity=0, interactive=False)
-    shutil.rmtree('temp') 
+    shutil.rmtree('temp')
     return Response("hdoiasjd")
 
 
