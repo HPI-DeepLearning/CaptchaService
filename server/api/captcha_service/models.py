@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from ipware.ip import get_ip
-from random import randint
+from random import randint, choice
 import uuid
 from polymorphic.models import PolymorphicModel
 import json
@@ -84,13 +84,13 @@ class TextCaptchaSession(CaptchaSession):
     solved_captcha = models.ForeignKey(
         TextCaptchaToken,
         on_delete=models.PROTECT,
-        #  limit_choices_to={'resolved': True},
+        limit_choices_to={'resolved': True},
 	related_name = 'solved'
     )
     unsolved_captcha = models.ForeignKey(
         TextCaptchaToken,
         on_delete=models.PROTECT,
-        #  limit_choices_to={'resolved': False},
+        limit_choices_to={'resolved': False},
 	related_name = 'unsolved'
     )
     order = models.BooleanField()# 0 -> solved unsolved 1 -> unsolved solved
@@ -134,8 +134,6 @@ class TextCaptchaSession(CaptchaSession):
         else:
            valid = False
 
-	print(valid)
-
 	return JsonResponse({'valid': valid})
 
 # 	for debugging purpose
@@ -157,13 +155,17 @@ class TextCaptchaSession(CaptchaSession):
 
     @staticmethod
     def _get_random_captcha_pair():
-        # TODO: retrieve one solved and one unsolved captcha token
-        text_tokens = TextCaptchaToken.objects.all()
+        # get unsolved captcha_token
+        text_tokens = TextCaptchaToken.objects.all().filter(resolved=0)
 	count = text_tokens.count()
-	first_captcha_index, second_captcha_index = randint(0, count-1), randint(0, count-1)
-        first = text_tokens[first_captcha_index]
-        second = text_tokens[second_captcha_index]
-        return first, second
+	unsolved_captcha_index = randint(0, count-1)
+        unsolved = text_tokens[unsolved_captcha_index]
+	# get solved captcha_token
+        text_tokens = TextCaptchaToken.objects.all().filter(resolved=1)
+	count = text_tokens.count()
+	solved_captcha_index = randint(0, count-1)
+        solved = text_tokens[solved_captcha_index]
+        return solved, unsolved 
 
     def _adjust_captchas_to_order(self):
 	if self.order == 0:
@@ -178,7 +180,6 @@ class ImageCaptchaSession(CaptchaSession):
 
     #order is a list with 0->solved_captcha_token, 1->unsolved_captcha_token
     order = SeparatedValuesField() # customField for saving lists in django
-
  
     #list with stored captcha_token
     image_token_list = SeparatedValuesField() 
@@ -187,16 +188,21 @@ class ImageCaptchaSession(CaptchaSession):
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
-	#create order with exactly 4 solved tokens, 0 -> solved, 1 -> unsolved
-	self.order = [1] * 9
+	#create order with exactly 4 solved tokens, 1 -> solved, 0 -> unsolved
+	self.order = [0] * 9
 	i = 0
 	while (i < 4):
 	    index_solved = randint(0,8)
-	    if(self.order[index_solved] == 1):
-		self.order[index_solved] = 0
+	    if(self.order[index_solved] == 0):
+		self.order[index_solved] = 1
 		i += 1
 
-
+	#chose task	
+	aux = ImageCaptchaToken.objects.all()
+	count = aux.count()
+	index = randint(0,count-1)
+	self.task = aux[index].task
+	
 	self.image_token_list = self.get_image_token_list(self.order)
 	url_list = []
 	for i in range(len(self.image_token_list)): 
@@ -250,19 +256,13 @@ class ImageCaptchaSession(CaptchaSession):
         on_delete=models.PROTECT,
     )
 
-	image_tokens = ImageCaptchaToken.objects.all()
-	count = image_tokens.count()
 	for boolean in order_list:
-	#TODO limit choices to resolved/unresolved tokens
-	    if (boolean == True):
-		current_token_index = randint(0,count-1)
-		current_token = image_tokens[current_token_index] 
-		#choose task randomly by first token
-		if(self.task == None):
-		    self.task = current_token.task
+	    if (boolean == 1):
+		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
 	    else:
-		count = ImageCaptchaToken.objects.count()
-		current_token_index = randint(0,count-1)
-		current_token = image_tokens[current_token_index]	    
+		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=False).filter(task=self.task)
+  	    count = image_tokens.count()
+	    current_token_index = randint(0,count-1)
+	    current_token = image_tokens[current_token_index]
 	    token_list.append(current_token)
 	return token_list
