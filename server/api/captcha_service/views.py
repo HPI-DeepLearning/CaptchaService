@@ -15,7 +15,6 @@ import os
 
 @api_view(['GET'])
 def request(request):
-
     remote_ip = get_ip(request)
     sessions = [ImageCaptchaSession, TextCaptchaSession]
     session = choice(sessions)() # random choice
@@ -92,6 +91,11 @@ def upload(request):
     call_command('collectstatic', verbosity=0, interactive=False)
     shutil.rmtree('temp')
     return Response("hdoiasjd")
+
+@api_view(['GET'])
+def download(request):
+    return response
+    # TODO download
 
 
 def _retrieve_corresponding_session(session_key, request):
