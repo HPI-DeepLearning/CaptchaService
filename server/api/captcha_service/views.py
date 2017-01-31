@@ -18,7 +18,7 @@ import os
 def request(request):
 
     remote_ip = get_ip(request)
-    session = TextCaptchaSession()
+    session = ImageCaptchaSession()
     session, response = session.create(remote_ip)
     session.save()
     return response
@@ -51,14 +51,11 @@ def upload(request):
     task = params.get('task', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
-    #TODO task   
- 
+    print task
+	 
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
-    try:
-	zf.extractall('temp')
-    except KeyError:
-	print 'Error: Could not extract Zip'
+    zf.extractall('temp')
 
     path = 'temp/captchas/'
     listing = os.listdir(path)
@@ -70,10 +67,10 @@ def upload(request):
 	    im.close()
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-	        token.create(file, image_data, 0, "testtask7") #TODO task
+	        token.create(file, image_data, 0, task) 
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
-	        token.create(file, image_data, 0, 'testtext') 
+	        token.create(file, image_data, 0) 
 	    token.save()
     elif (solved == "solved"):
 	for file_name, solution in _yield_captcha_solutions():
@@ -82,8 +79,7 @@ def upload(request):
 	    im.close()
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-		token.create(file_name, image_data, 1, "testtask8", solution=='1') #TODO task, solution=='1' evaluates to bool True
-		print solution
+		token.create(file_name, image_data, 1, task, solution=='1') #solution=='1' evaluates to bool True
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
@@ -108,7 +104,6 @@ def _retrieve_corresponding_session(session_key, request):
     return session
 
 def _yield_captcha_solutions():
-    #TODO try/catch if txt exists
     with open('temp/captchas.txt', 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
