@@ -4,13 +4,13 @@
 
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}User test{% endblock %}</title>
+    <title>{% block title %}Captcha Service{% endblock %}</title>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Captcha Service HPI">
     <meta name="author" content="Robert Stark">
-    <!-- Le styles -->
-    <!-- <link rel="shortcut icon" href="ico/favicon.ico"> -->
+
+    <link rel="shortcut icon" href="{{ STATIC_URL }}/favicon/favicon-unlock-alt.ico">
     <link href="{{ STATIC_URL }}materialize/css/materialize.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="{{ STATIC_URL }}style.css" />
@@ -27,6 +27,7 @@
                 <li><a href="{% url 'auth_logout' %}">{% trans "Log out" %}</a></li>
                 <li><a href="{% url 'auth_password_change' %}">{% trans "Change password" %}</a></li>
                 <li><a href="{% url 'upload' %}">{% trans "Upload" %}</a></li>
+                <li><a href="{% url 'download' %}">{% trans "Download" %}</a></li>
             {% else %}
                <li><a href="{% url 'auth_login' %}">{% trans "Log in" %}</a></li>
             {% endif %}

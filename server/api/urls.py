@@ -24,4 +24,5 @@ urlpatterns = [
     url(r'^captcha/', include('captcha_service.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^upload/', TemplateView.as_view(template_name='upload.html'), name='upload'),
+    url(r'^download/', TemplateView.as_view(template_name='download.html'), name='download'),
 ]

@@ -3,8 +3,12 @@
 
 {% block content %}
 {% if user.is_authenticated %}
-	Hi {{ user.username }}!
+	<div class="center">
+		<h4>Hi {{ user.username }}!</h4>
+	</div>
 {% else %}
-   Please log in or register.
+	<div class="center">
+		<h4>Please log in or register.</h4>
+	</div>
 {% endif %}
 {% endblock %}
