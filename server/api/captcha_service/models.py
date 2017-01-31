@@ -38,8 +38,9 @@ class TextCaptchaToken(CaptchaToken):
     """docstring for TextCaptcha."""
 
     result = EncryptedCharField(max_length=256)
+    insolvable = models.BooleanField(default=False)
 
-    def create(self, file_name, file_data, resolved, result=''):
+    def create(self, file_name, file_data, resolved, result='', insolvable=False):
         super(TextCaptchaToken, self).create(file_name, file_data, resolved)
         self.result = result
         self.captcha_type = "text"
@@ -111,6 +112,18 @@ class TextCaptchaSession(CaptchaSession):
 
 	return self, response
 
+    def try_solve(self):
+	proposals = self.unsolved_captcha.proposals
+	most_common = proposals.most_common()
+	num_proposoals = sum(proposals.values())
+
+	if num_proposoals >= 3:
+	    if most_common[0][1] >= 3:
+		unsolved_captcha.resolved = True
+		unsolved_captcha.result = most_common[0][0]
+	elif num_proposoals >= 6:
+	    unsolved_captcha.insolvable = True
+	    unsolved_captcha.resolved = True
 
     def validate(self, params):
         result = params.get('result', None).strip()
@@ -123,13 +136,14 @@ class TextCaptchaSession(CaptchaSession):
 	# validate input
 	if self.order == 0 and self.solved_captcha.result.strip() == first_result.strip() or self.order == 1 and self.solved_captcha.result.strip() == second_result.strip():
 
-	   valid = True
-	   if self.order == 0:
-	       self.unsolved_captcha.add_proposal(second_result.strip())
-	   else:
-	       self.unsolved_captcha.add_proposal(first_result.strip())
+	    valid = True
+	    if self.order == 0:
+		self.unsolved_captcha.add_proposal(second_result.strip())
+	    else:
+		self.unsolved_captcha.add_proposal(first_result.strip())
+	    self.delete()
 
-	   self.delete()
+	    self.try_solve()
 
         else:
            valid = False
@@ -157,7 +171,7 @@ class TextCaptchaSession(CaptchaSession):
 
     @staticmethod
     def _get_random_captcha_pair():
-        solved_text_tokens = TextCaptchaToken.objects.filter(resolved=True)
+        solved_text_tokens = TextCaptchaToken.objects.filter(resolved=True, insolvable=False)
         unsolved_text_tokens = TextCaptchaToken.objects.filter(resolved=False)
 
 	solved_count = solved_text_tokens.count()
