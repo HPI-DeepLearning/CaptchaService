@@ -46,6 +46,21 @@ class TextCaptchaToken(CaptchaToken):
         self.captcha_type = "text"
         return self
 
+    def try_solve(self):
+	proposals = self.proposals
+	most_common = proposals.most_common()
+	num_proposoals = sum(proposals.values())
+
+	if num_proposoals >= 6:
+	    self.insolvable = True
+	    self.resolved = True
+	    self.save()
+	elif num_proposoals >= 3:
+	    if most_common[0][1] >= 3:
+		self.resolved = True
+		self.result = most_common[0][0]
+		self.save()
+
 class ImageCaptchaToken(CaptchaToken):
 
     #The task is a category of pictures and it should be tested if the token belongs to it
@@ -59,6 +74,21 @@ class ImageCaptchaToken(CaptchaToken):
         self.result = result
         self.captcha_type = "image"
 	return self
+
+    def try_solve(self):
+	proposals = self.proposals
+	most_common = proposals.most_common()
+	num_proposoals = sum(proposals.values())
+
+	if num_proposoals >= 6:
+	    self.insolvable = True
+	    self.resolved = True
+	    self.save()
+	elif num_proposoals >= 4:
+	    if most_common[0][1] >= 4:
+		self.resolved = True
+		self.result = most_common[0][0]
+		self.save()
 
 class CaptchaSession(PolymorphicModel):
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
@@ -112,20 +142,20 @@ class TextCaptchaSession(CaptchaSession):
 
 	return self, response
 
-    def try_solve(self):
-	proposals = self.unsolved_captcha.proposals
-	most_common = proposals.most_common()
-	num_proposoals = sum(proposals.values())
-
-	if num_proposoals >= 6:
-	    self.unsolved_captcha.insolvable = True
-	    self.unsolved_captcha.resolved = True
-	    self.unsolved_captcha.save()
-	elif num_proposoals >= 3:
-	    if most_common[0][1] >= 3:
-		self.unsolved_captcha.resolved = True
-		self.unsolved_captcha.result = most_common[0][0]
-		self.unsolved_captcha.save()
+#    def try_solve(self):
+#	proposals = self.unsolved_captcha.proposals
+#	most_common = proposals.most_common()
+#	num_proposoals = sum(proposals.values())
+#
+#	if num_proposoals >= 6:
+#	    self.unsolved_captcha.insolvable = True
+#	    self.unsolved_captcha.resolved = True
+#	    self.unsolved_captcha.save()
+##	elif num_proposoals >= 3:
+#	    if most_common[0][1] >= 3:
+#		self.unsolved_captcha.resolved = True
+#		self.unsolved_captcha.result = most_common[0][0]
+#		self.unsolved_captcha.save()
 
     def validate(self, params):
         result = params.get('result', None).strip()
@@ -144,7 +174,7 @@ class TextCaptchaSession(CaptchaSession):
 	    else:
 		self.unsolved_captcha.add_proposal(first_result.strip())
 
-	    self.try_solve()
+	    self.unsolved_captcha.try_solve()
 
 	    self.delete()
 
@@ -246,6 +276,7 @@ class ImageCaptchaSession(CaptchaSession):
 	    for index, element in enumerate(self.order):
 		if (element == 1):
 		    self.image_token_list[index].add_proposal(result[index])
+		    self.image_token_list[index].try_solve()
 
 	return JsonResponse({'valid' : valid})
 	
