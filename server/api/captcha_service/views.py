@@ -97,6 +97,11 @@ def upload(request):
     shutil.rmtree('temp') 
     return Response("hdoiasjd")
 
+@api_view(['GET'])
+def download(request):
+    return response
+    # TODO download
+
 
 def _retrieve_corresponding_session(session_key, request):
     try:

@@ -48,7 +48,8 @@ INSTALLED_APPS = (
     # allauth
     'allauth',
     'allauth.account',
-    'rest_auth.registration',
+    # 'rest_auth.registration',
+    'registration',
     # cors headers
     'corsheaders',
     'polymorphic',
@@ -115,9 +116,16 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_SESSION_LOGIN = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'                                                                             
+EMAIL_HOST ='smtp.gmail.com'                                   
+EMAIL_PORT = 587                                                             
+EMAIL_HOST_USER = 'hpicaptcha@gmail.com'                              
+EMAIL_HOST_PASSWORD = 'captchaservice2017'
+EMAIL_USE_TLS = True
+
 SITE_ID = 1
 ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 WSGI_APPLICATION = 'wsgi.application'
 
 ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window
