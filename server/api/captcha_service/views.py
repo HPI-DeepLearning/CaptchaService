@@ -12,6 +12,7 @@ import uuid
 import zipfile
 import shutil
 import os
+import image_distortion
 
 @api_view(['GET'])
 def request(request):
@@ -51,11 +52,11 @@ def renew(request):
 def upload(request):
     params = request.POST
     captchatype = params.get('captchatype', None)
-    solved = params.get('textsolution', None) 
+    solved = params.get('textsolution', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
-    #TODO task   
- 
+    #TODO task
+
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
     try:
@@ -70,14 +71,16 @@ def upload(request):
 	for file in listing:
 	    im = open(path + file, 'rb')
 	    image_data = im.read()
-	    im.close()
 	    if (captchatype == 'imagecaptcha'):
+#		image_data = im.read()
 		token = ImageCaptchaToken()
 	        token.create(file, image_data, 0, "testtask7") #TODO task
 	    elif (captchatype == 'textcaptcha'):
+#		image_data = image_distortion.processImage(im)
 		token = TextCaptchaToken()
-	        token.create(file, image_data, 0, 'testtext') 
+	        token.create(file, image_data, 0, 'testtext')
 	    token.save()
+	    im.close()
     elif (solved == "solved"):
 	for file_name, solution in _yield_captcha_solutions():
 	    im = open(path + file_name, 'rb')
@@ -90,11 +93,11 @@ def upload(request):
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
-	    token.save()	
+	    token.save()
 
-    
+
     call_command('collectstatic', verbosity=0, interactive=False)
-    shutil.rmtree('temp') 
+    shutil.rmtree('temp')
     return Response("hdoiasjd")
 
 @api_view(['GET'])
