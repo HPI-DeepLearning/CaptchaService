@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from ipware.ip import get_ip
 from .models import CaptchaToken, CaptchaSession, TextCaptchaSession, ImageCaptchaSession, ImageCaptchaToken, TextCaptchaToken
-from random import randint
+from random import randint, choice
 from PIL import Image
 import uuid
 import zipfile
@@ -17,12 +17,8 @@ import os
 @api_view(['GET'])
 def request(request):
     remote_ip = get_ip(request)
-
-    captcha_type = randint(0,1)
-    if captcha_type == 1:
-        session = ImageCaptchaSession()
-    else:
-        session = TextCaptchaSession()
+    sessions = [ImageCaptchaSession, TextCaptchaSession]
+    session = choice(sessions)() # random choice
 
     session, response = session.create(remote_ip)
     session.save()
@@ -52,12 +48,13 @@ def renew(request):
 def upload(request):
     params = request.POST
     captchatype = params.get('captchatype', None)
-    solved = params.get('textsolution', None) 
+
+    solved = params.get('textsolution', None)
     task = params.get('task', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
     print task
-	 
+
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
     zf.extractall('temp')
@@ -72,10 +69,10 @@ def upload(request):
 	    im.close()
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-	        token.create(file, image_data, 0, task) 
+	        token.create(file, image_data, 0, task)
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
-	        token.create(file, image_data, 0) 
+	        token.create(file, image_data, 0)
 	    token.save()
     elif (solved == "solved"):
 	for file_name, solution in _yield_captcha_solutions():
@@ -88,12 +85,12 @@ def upload(request):
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
-	    token.save()	
+	    token.save()
 
-    
+
     call_command('collectstatic', verbosity=0, interactive=False)
-    shutil.rmtree('temp') 
-    return HttpResponseRedirect('/') 
+    shutil.rmtree('temp')
+    return HttpResponseRedirect('/')
 
 @api_view(['GET'])
 def download(request):
