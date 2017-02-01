@@ -1,7 +1,7 @@
 /*
 *
-*       Requirements: - form must have ID "captcha-form"
-*                     - form button must have ID "captcha-button"
+*       Requirements: - form must have class "captcha-form"
+*                     - form button must have class "captcha-button"
 *
 */
 
@@ -38,6 +38,14 @@ var captchaSolved = false,
                     '<a href="#" id="submit">Submit</a><a href="#" id="refresh"><i class="fa fa-refresh">refresh</i></a>' +
                 '</div></div></div>'
     },
+    insertSessionKey = function(key) {
+        var inputElementString = '<input id="session_key" type="hidden" name="captcha-key" value="' + key + '" />',
+            form = document.querySelectorAll('.captcha-form')[0],
+            div = document.createElement('div');
+        div.innerHTML = inputElementString;
+        var input = div.firstChild;
+        form.appendChild(input);
+    },
     insertCaptchaData = {
         text: function (response) {
             var firstImage = document.querySelectorAll('.first-captcha > img')[0],
@@ -45,9 +53,8 @@ var captchaSolved = false,
             if (!firstImage || !secondImage) {
                 throw new Error('missing text captcha markup!');
             }
-            var captchaContainer = document.querySelectorAll('.captcha-image-container')[0];
             if (response.session_key){
-                captchaContainer.setAttribute('key', response.session_key);
+                insertSessionKey(response.session_key);
             }
             firstImage.setAttribute('src', baseURL + response.first_url);
             secondImage.setAttribute('src', baseURL + response.second_url);
@@ -81,10 +88,8 @@ var captchaSolved = false,
             checkboxes.forEach(function(el) {
                 el.checked = false;
             });
-            
-            var captchaContainer = document.querySelectorAll('.captcha-image-container')[0];
             if (response.session_key){
-                captchaContainer.setAttribute('key', response.session_key);
+                insertSessionKey(response.session_key);
             }
             var imgElements = document.querySelectorAll('.input ~ label img')
             for(i = 0; i < 9; i++) {
@@ -106,7 +111,31 @@ var captchaSolved = false,
                 labelElements[i].style.height = '' + tileWidth + 'px';
             }
         }
-    }
+    },
+    feedbackUserOnWrongInput = function(message) {
+        //TODO
+    },
+    obtainResult = {
+        text: function() {
+            var result = document.querySelectorAll(".captcha-input input").value;
+            if (result) {
+                return result;
+            } else {
+                feedbackUserOnWrongInput('Please provide a solution!');
+                return null
+            }
+        },
+        image: function() {
+            var checkboxes = document.querySelectorAll(".captcha-image-container input"),
+            results = [];
+            for(i = 0; i < 9; i++){
+                var current_checkbox = checkboxes[i],
+                    selected = current_checkbox.checked? 1 : 0;
+                results.push(selected);
+            }
+            return results
+        }
+    };
 
 /* 1. Open captcha session */
 var baseURL = baseURL || 'http://localhost:8000/';
@@ -155,13 +184,13 @@ var handleResponse = function (response) {
 
     /* 3. Lookup form and form button element */
 
-    var form = (!document.querySelectorAll('#captcha-form'))? false : document.querySelectorAll('#captcha-form')[0],
-        button = (!document.querySelectorAll('#captcha-button'))? false : document.querySelectorAll('#captcha-button')[0];
+    var form = (!document.querySelectorAll('.captcha-form'))? false : document.querySelectorAll('.captcha-form')[0],
+        button = (!document.querySelectorAll('.captcha-button'))? false : document.querySelectorAll('.captcha-button')[0];
     if (!button) {
-        throw new Error('form button element with id "captcha-button" does not exist');
+        throw new Error('form button element with class "captcha-button" does not exist');
     }
     if (!form) {
-        throw new Error('form element with id "captcha-form" does not exist');
+        throw new Error('form element with class "captcha-form" does not exist');
     }
 
     /* 4. Add eventlistener on form button to summon overlay */
@@ -182,12 +211,10 @@ var handleResponse = function (response) {
     /* 5. Add eventlistener refresh button */
     var refresh = document.getElementById('refresh');
     refresh.addEventListener('click', function(e){
-        var captchaContainer = document.querySelectorAll('.captcha-image-container')[0],
-            sessionKey = captchaContainer.getAttribute('key');
-
-        var renewURL = baseURL + 'captcha/renew';
-        var captchaReq = new XMLHttpRequest();
-        var response = "";
+        var sessionKey = document.querySelectorAll('#session_key')[0].getAttribute('value'),
+            renewURL = baseURL + 'captcha/renew',
+            captchaReq = new XMLHttpRequest(),
+            response = "";
         captchaReq.open('POST', renewURL, true);
         captchaReq.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         captchaReq.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -209,7 +236,7 @@ var handleResponse = function (response) {
         captchaReq.send('session_key=' + sessionKey);
     });
 
-    // click on overlay should hide captcha card
+    // 5. Click on overlay should hide captcha card
     var captchaOverlay = document.getElementsByClassName('overlay')[0];
     captchaOverlay.addEventListener('click', function(e){
         captchaOverlay.classList.remove('fadeIn');
@@ -219,9 +246,39 @@ var handleResponse = function (response) {
     captchaCard.addEventListener('click', function(e){
         e.stopPropagation();
     });
+
+    // 6. POST Form on validation and secrect key generated by Web Service
+
+    var submit = document.getElementById('submit');
+    console.log(submit);
+    submit.addEventListener('click', function(e){
+        var sessionKey = document.querySelectorAll('#session_key')[0].getAttribute('value'),
+            result = obtainResult[type](),
+            submitURL = baseURL + 'captcha/validate',
+            captchaReq = new XMLHttpRequest(),
+            response = "";
+        captchaReq.open('POST', submitURL, true);
+        captchaReq.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        captchaReq.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        captchaReq.responseType = 'json';
+        captchaReq.onload = function (e) {
+            if(captchaReq.status === 200) {
+                var xhr = e.target;
+                if (xhr.responseType === 'json') {
+                    response = xhr.response;
+                    insertCaptchaData[type](response);
+                } else {
+                    response = JSON.parse(xhr.responseText); // IE bug fix
+                    insertCaptchaData[type](response);
+                }
+            } else {
+              throw new Error('An error occurred during your request: ' +  captchaReq.status + ' ' + captchaReq.statusText);
+            }
+        };
+        captchaReq.send('session_key=' + sessionKey + '&result=' + result);
+    });
 }
 
-// 4. POST Form on validation and secrect key generated by Web Service
 
 
 /*

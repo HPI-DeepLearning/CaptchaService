@@ -6,7 +6,7 @@
 	<title></title>
 	<link rel="stylesheet" type="text/css" media="screen" href="test_js.css" />
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-    <link rel="stylesheet" type="text/css" media="screen" href="captcha.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="../captcha.css" />
 	<!--[if IE]>
 		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
@@ -21,10 +21,10 @@
           <button>create</button>
           <p class="message">Already registered? <a href="#">Sign In</a></p>
         </form>
-        <form class="login-form" id="captcha-form">
+        <form class="login-form captcha-form">
           <input type="text" placeholder="username"/>
           <input type="password" placeholder="password"/>
-          <button id="captcha-button">login</button>
+          <button class="captcha-button">login</button>
           <p class="message">Not registered? <a href="#">Create an account</a></p>
         </form>
       </div>
