@@ -48,7 +48,8 @@ def find_dominant_color(input_img):
 
 	return tuple(peak)
 
-def processImage(input_img):
+def processImage(file_path):
+	input_img = Image.open(file_path)
 	input_data = input_img.load()
 
 	width = input_img.size[0]
@@ -75,9 +76,8 @@ def main():
 	infile = sys.argv[1]
 	name, ending = os.path.splitext(infile)
 	outfile = name + "_new" + ending
-	input_img = Image.open(infile)
 
-	output_img = processImage(input_img)
+	output_img = processImage(infile)
 
 	output_img.save(outfile)
 

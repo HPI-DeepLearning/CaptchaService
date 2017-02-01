@@ -78,12 +78,17 @@ def upload(request):
 	for file in listing:
 	    im = open(path + file, 'rb')
 	    image_data = im.read()
+	    if file.endswith(".txt"):
+		continue	
 	    if (captchatype == 'imagecaptcha'):
+#		im = open(path + file, 'rb')
 #		image_data = im.read()
 		token = ImageCaptchaToken()
 		token.create(file, image_data, 0, "testtask7") #TODO task
+		im.close()
 	    elif (captchatype == 'textcaptcha'):
-#		image_data = image_distortion.processImage(im)
+		file_path = path + file
+#		image_data = image_distortion.processImage(file_path)
 		token = TextCaptchaToken()
 		token.create(file, image_data, 0, 'testtext')
 	    token.save()
