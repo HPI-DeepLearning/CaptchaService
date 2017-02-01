@@ -116,7 +116,14 @@ var captchaSolved = false,
         //TODO
     },
     reactOnValidationResponse = function(response) {
-        console.log(response);
+        if(response.valid) {
+            captchaSolved = true;
+            document.querySelectorAll('.captcha-button')[0].click();
+        } else {
+            var captchaCard = document.querySelectorAll('.captcha-card')[0];
+            captchaCard.classList.add('shake');
+            setTimeout(function(){captchaCard.classList.remove('shake')}, 1000);
+        }
     },
     obtainResult = {
         text: function() {
@@ -184,7 +191,6 @@ var handleResponse = function (response) {
 
     insertCaptchaData[type](response);
 
-
     /* 3. Lookup form and form button element */
 
     var form = (!document.querySelectorAll('.captcha-form'))? false : document.querySelectorAll('.captcha-form')[0],
@@ -208,7 +214,9 @@ var handleResponse = function (response) {
             // show captcha overlay
             captchaOverlay.classList.add('show');
             setTimeout(function(){captchaOverlay.classList.add('fadeIn');}, 10);
-        }
+        } else{
+        console.log('submit em :)');
+    }
     })
 
     /* 5. Add eventlistener refresh button */
@@ -281,32 +289,13 @@ var handleResponse = function (response) {
         console.log(result);
         captchaReq.send('session_key=' + sessionKey + '&result=' + result);
     });
-}
 
-
-
-/*
-
-$('#submit').on('click', function(e) {
-    e.preventDefault();
-    var result = $('.input').val();
-    var session_key = $('.card').attr('key')
-    var data = {result: result, session_key: session_key};
-    $.ajax('http://localhost:8000/captcha/validate', {
-        data: data,
-        dataType: 'json',
-        type: 'POST',
-        success: function(data) {
-            console.log(data)
-            if (data.valid) {
-                $('.card').attr('id', '');
-                $('.card').slideUp();
-            }
-            else {
-                $('.card').effect('shake');
-                $('.card').attr('id', 'wrong-input');
-            }
-        }
-    })
+    // Enter on text input should submit it
+    var textInput = document.querySelectorAll(".captcha-input > input")[0];
+    textInput.addEventListener('keypress', function (e) {
+        var key = e.which || e.keyCode;
+        if (key === 13) { // 13 is enter
+          document.getElementById('submit').click();
+    };
 });
-*/
+}
