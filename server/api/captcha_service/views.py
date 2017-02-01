@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.core.management import call_command
 from rest_framework.response import Response
@@ -18,6 +19,7 @@ def request(request):
     remote_ip = get_ip(request)
     sessions = [ImageCaptchaSession, TextCaptchaSession]
     session = choice(sessions)() # random choice
+
     session, response = session.create(remote_ip)
     session.save()
     return response
@@ -46,17 +48,16 @@ def renew(request):
 def upload(request):
     params = request.POST
     captchatype = params.get('captchatype', None)
+
     solved = params.get('textsolution', None)
+    task = params.get('task', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
-    #TODO task
+    print task
 
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
-    try:
-	zf.extractall('temp')
-    except KeyError:
-	print 'Error: Could not extract Zip'
+    zf.extractall('temp')
 
     path = 'temp/captchas/'
     listing = os.listdir(path)
@@ -68,10 +69,10 @@ def upload(request):
 	    im.close()
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-	        token.create(file, image_data, 0, "testtask7") #TODO task
+	        token.create(file, image_data, 0, task)
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
-	        token.create(file, image_data, 0, 'testtext')
+	        token.create(file, image_data, 0)
 	    token.save()
     elif (solved == "solved"):
 	for file_name, solution in _yield_captcha_solutions():
@@ -80,8 +81,7 @@ def upload(request):
 	    im.close()
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-		token.create(file_name, image_data, 1, "testtask8", solution=='1') #TODO task, solution=='1' evaluates to bool True
-		print solution
+		token.create(file_name, image_data, 1, task, solution=='1') #solution=='1' evaluates to bool True
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
@@ -90,13 +90,12 @@ def upload(request):
 
     call_command('collectstatic', verbosity=0, interactive=False)
     shutil.rmtree('temp')
-    return Response("hdoiasjd")
+    return HttpResponseRedirect('/')
 
 @api_view(['GET'])
 def download(request):
     return response
     # TODO download
-
 
 def _retrieve_corresponding_session(session_key, request):
     try:

@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
 from ipware.ip import get_ip
-from random import randint
+from random import randint, choice
 import uuid
 from polymorphic.models import PolymorphicModel
 import json
@@ -32,18 +32,34 @@ class CaptchaToken(PolymorphicModel):
         self.save()
 
     def __str__(self):
-	return str(self.id) + ", " + self.captcha_type
+	return str(self.id) + ", " + self.captcha_type + ", " + str(self.resolved)
 
 class TextCaptchaToken(CaptchaToken):
     """docstring for TextCaptcha."""
 
     result = EncryptedCharField(max_length=256)
+    insolvable = models.BooleanField(default=False)
 
-    def create(self, file_name, file_data, resolved, result=''):
+    def create(self, file_name, file_data, resolved, result='', insolvable=False):
         super(TextCaptchaToken, self).create(file_name, file_data, resolved)
         self.result = result
         self.captcha_type = "text"
         return self
+
+    def try_solve(self):
+	proposals = self.proposals
+	most_common = proposals.most_common()
+	num_proposoals = sum(proposals.values())
+
+	if num_proposoals >= 6:
+	    self.insolvable = True
+	    self.resolved = True
+	    self.save()
+	elif num_proposoals >= 3:
+	    if most_common[0][1] >= 3:
+		self.resolved = True
+		self.result = most_common[0][0]
+		self.save()
 
 class ImageCaptchaToken(CaptchaToken):
 
@@ -58,6 +74,21 @@ class ImageCaptchaToken(CaptchaToken):
         self.result = result
         self.captcha_type = "image"
 	return self
+
+    def try_solve(self):
+	proposals = self.proposals
+	most_common = proposals.most_common()
+	num_proposoals = sum(proposals.values())
+
+	if num_proposoals >= 6:
+	    self.insolvable = True
+	    self.resolved = True
+	    self.save()
+	elif num_proposoals >= 4:
+	    if most_common[0][1] >= 4:
+		self.resolved = True
+		self.result = most_common[0][0]
+		self.save()
 
 class CaptchaSession(PolymorphicModel):
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
@@ -84,13 +115,13 @@ class TextCaptchaSession(CaptchaSession):
     solved_captcha = models.ForeignKey(
         TextCaptchaToken,
         on_delete=models.PROTECT,
-        #  limit_choices_to={'resolved': True},
+        limit_choices_to={'resolved': True},
 	related_name = 'solved'
     )
     unsolved_captcha = models.ForeignKey(
         TextCaptchaToken,
         on_delete=models.PROTECT,
-        #  limit_choices_to={'resolved': False},
+        limit_choices_to={'resolved': False},
 	related_name = 'unsolved'
     )
     order = models.BooleanField()# 0 -> solved unsolved 1 -> unsolved solved
@@ -111,6 +142,20 @@ class TextCaptchaSession(CaptchaSession):
 
 	return self, response
 
+#    def try_solve(self):
+#	proposals = self.unsolved_captcha.proposals
+#	most_common = proposals.most_common()
+#	num_proposoals = sum(proposals.values())
+#
+#	if num_proposoals >= 6:
+#	    self.unsolved_captcha.insolvable = True
+#	    self.unsolved_captcha.resolved = True
+#	    self.unsolved_captcha.save()
+##	elif num_proposoals >= 3:
+#	    if most_common[0][1] >= 3:
+#		self.unsolved_captcha.resolved = True
+#		self.unsolved_captcha.result = most_common[0][0]
+#		self.unsolved_captcha.save()
 
     def validate(self, params):
         result = params.get('result', None).strip()
@@ -123,18 +168,19 @@ class TextCaptchaSession(CaptchaSession):
 	# validate input
 	if self.order == 0 and self.solved_captcha.result.strip() == first_result.strip() or self.order == 1 and self.solved_captcha.result.strip() == second_result.strip():
 
-	   valid = True
-	   if self.order == 0:
-	       self.unsolved_captcha.add_proposal(second_result.strip())
-	   else:
-	       self.unsolved_captcha.add_proposal(first_result.strip())
+	    valid = True
+	    if self.order == 0:
+		self.unsolved_captcha.add_proposal(second_result.strip())
+	    else:
+		self.unsolved_captcha.add_proposal(first_result.strip())
 
-	   self.delete()
+	    self.unsolved_captcha.try_solve()
+
+	    self.delete()
+
 
         else:
            valid = False
-
-	print(valid)
 
 	return JsonResponse({'valid': valid})
 
@@ -157,13 +203,17 @@ class TextCaptchaSession(CaptchaSession):
 
     @staticmethod
     def _get_random_captcha_pair():
-        # TODO: retrieve one solved and one unsolved captcha token
-        text_tokens = TextCaptchaToken.objects.all()
+        # get unsolved captcha_token
+        text_tokens = TextCaptchaToken.objects.all().filter(resolved=True, insolvable =False)
 	count = text_tokens.count()
-	first_captcha_index, second_captcha_index = randint(0, count-1), randint(0, count-1)
-        first = text_tokens[first_captcha_index]
-        second = text_tokens[second_captcha_index]
-        return first, second
+	unsolved_captcha_index = randint(0, count-1)
+        unsolved = text_tokens[unsolved_captcha_index]
+	# get solved captcha_token
+        text_tokens = TextCaptchaToken.objects.all().filter(resolved=False)
+	count = text_tokens.count()
+	solved_captcha_index = randint(0, count-1)
+        solved = text_tokens[solved_captcha_index]
+        return solved, unsolved 
 
     def _adjust_captchas_to_order(self):
 	if self.order == 0:
@@ -178,28 +228,32 @@ class ImageCaptchaSession(CaptchaSession):
 
     #order is a list with 0->solved_captcha_token, 1->unsolved_captcha_token
     order = SeparatedValuesField() # customField for saving lists in django
-
  
     #list with stored captcha_token
     image_token_list = SeparatedValuesField() 
     task = models.TextField(null=True)
-		
+
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
-	#create order with exactly 4 solved tokens, 0 -> solved, 1 -> unsolved
-	self.order = [1] * 9
+	#create order with exactly 4 solved tokens, 1 -> solved, 0 -> unsolved
+	self.order = [0] * 9
 	i = 0
 	while (i < 4):
 	    index_solved = randint(0,8)
-	    if(self.order[index_solved] == 1):
-		self.order[index_solved] = 0
+	    if(self.order[index_solved] == 0):
+		self.order[index_solved] = 1
 		i += 1
 
-
+	#chose task	
+	aux = ImageCaptchaToken.objects.all()
+	count = aux.count()
+	index = randint(0,count-1)
+	self.task = aux[index].task
+	
 	self.image_token_list = self.get_image_token_list(self.order)
 	url_list = []
-	for i in range(len(self.image_token_list)): 
+	for i in range(len(self.image_token_list)):
 	    url_list.append(self.image_token_list[i].file.url)
 
 	response = JsonResponse({'url_list' : url_list,
@@ -224,6 +278,7 @@ class ImageCaptchaSession(CaptchaSession):
 	    for index, element in enumerate(self.order):
 		if (element == 1):
 		    self.image_token_list[index].add_proposal(result[index])
+		    self.image_token_list[index].try_solve()
 
 	return JsonResponse({'valid' : valid})
 	
@@ -241,8 +296,6 @@ class ImageCaptchaSession(CaptchaSession):
 				 'task' : self.task,
 	                     	'type': 'image'})
 
-
-    
     def get_image_token_list(self, order_list):
 	token_list = []
 	current_token = models.ForeignKey(
@@ -250,19 +303,14 @@ class ImageCaptchaSession(CaptchaSession):
         on_delete=models.PROTECT,
     )
 
-	image_tokens = ImageCaptchaToken.objects.all()
-	count = image_tokens.count()
 	for boolean in order_list:
-	#TODO limit choices to resolved/unresolved tokens
-	    if (boolean == True):
-		current_token_index = randint(0,count-1)
-		current_token = image_tokens[current_token_index] 
-		#choose task randomly by first token
-		if(self.task == None):
-		    self.task = current_token.task
+<<<<<<< HEAD
+	    if (boolean == 1):
+		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
 	    else:
-		count = ImageCaptchaToken.objects.count()
-		current_token_index = randint(0,count-1)
-		current_token = image_tokens[current_token_index]	    
+		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=False).filter(task=self.task)
+  	    count = image_tokens.count()
+	    current_token_index = randint(0,count-1)
+	    current_token = image_tokens[current_token_index]
 	    token_list.append(current_token)
 	return token_list
