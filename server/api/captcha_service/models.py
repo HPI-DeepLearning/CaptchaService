@@ -304,7 +304,6 @@ class ImageCaptchaSession(CaptchaSession):
     )
 
 	for boolean in order_list:
-<<<<<<< HEAD
 	    if (boolean == 1):
 		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
 	    else:

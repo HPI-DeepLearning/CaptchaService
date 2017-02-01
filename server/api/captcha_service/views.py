@@ -97,9 +97,36 @@ def upload(request):
 
 @api_view(['GET'])
 def download(request):
-    return response
-    # TODO download
-
+    params=request.GET
+    captchatype = params.get('captchatype', None)
+    textsolution = params.get('textsolution', None)
+    if (textsolution == 'unsolved'):
+	resolved = False
+    else:
+	resolved = True
+    #TODO task
+    
+    file_name_list = []
+    zipf = zipfile.ZipFile('captchas.zip', 'w', zipfile.ZIP_DEFLATED)
+    if (resolved == False):
+	if (captchatype == 'imagecaptcha'):
+	    token_list = ImageCaptchaToken.objects.all().filter(resolved=False)
+        else:
+	    token_list = TextCaptchaToken.objects.all().filter(resolved=False)
+	
+	for token in token_list:
+	    file_name_list.append(token.file.name)
+	print file_name_list
+	_create_zipfile('static/captchas/', zipf, file_name_list)
+	# fix for Linux zip files read in Windows TODO test
+	#for file in zipf.filelist:
+	#    file.create_system = 0
+	zipf.close()
+	
+	
+    executed = "exec"
+    return JsonResponse({'executed': executed})
+ 
 def _retrieve_corresponding_session(session_key, request):
     try:
         session = CaptchaSession.objects.get(pk=session_key)
@@ -126,3 +153,9 @@ def _any_parameter_unset(*keys):
             if not key:
                 return True
         return False
+
+def _create_zipfile(path, ziph, file_name_list):
+    #ziph is zipfile handle
+    print len(file_name_list)
+    for element in file_name_list:
+	ziph.write( element, 'captchas/'+os.path.basename(path+element)) # second argument defines structure of zipfile
