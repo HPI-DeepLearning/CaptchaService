@@ -115,9 +115,12 @@ var captchaSolved = false,
     feedbackUserOnWrongInput = function(message) {
         //TODO
     },
+    reactOnValidationResponse = function(response) {
+        console.log(response);
+    },
     obtainResult = {
         text: function() {
-            var result = document.querySelectorAll(".captcha-input input").value;
+            var result = document.querySelectorAll(".captcha-input > input")[0].value;
             if (result) {
                 return result;
             } else {
@@ -266,15 +269,16 @@ var handleResponse = function (response) {
                 var xhr = e.target;
                 if (xhr.responseType === 'json') {
                     response = xhr.response;
-                    insertCaptchaData[type](response);
+                    reactOnValidationResponse(response);
                 } else {
                     response = JSON.parse(xhr.responseText); // IE bug fix
-                    insertCaptchaData[type](response);
+                    reactOnValidationResponse(response);
                 }
             } else {
               throw new Error('An error occurred during your request: ' +  captchaReq.status + ' ' + captchaReq.statusText);
             }
         };
+        console.log(result);
         captchaReq.send('session_key=' + sessionKey + '&result=' + result);
     });
 }
