@@ -19,10 +19,10 @@ def request(request):
     remote_ip = get_ip(request)
 
     captcha_type = randint(0,1)
-#    if captcha_type == 1:
-#        session = ImageCaptchaSession()
-#    else:
-    session = TextCaptchaSession()
+    if captcha_type == 1:
+        session = ImageCaptchaSession()
+    else:
+        session = TextCaptchaSession()
 
     session, response = session.create(remote_ip)
     session.save()

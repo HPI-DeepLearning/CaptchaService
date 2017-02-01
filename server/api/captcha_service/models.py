@@ -142,21 +142,6 @@ class TextCaptchaSession(CaptchaSession):
 
 	return self, response
 
-#    def try_solve(self):
-#	proposals = self.unsolved_captcha.proposals
-#	most_common = proposals.most_common()
-#	num_proposoals = sum(proposals.values())
-#
-#	if num_proposoals >= 6:
-#	    self.unsolved_captcha.insolvable = True
-#	    self.unsolved_captcha.resolved = True
-#	    self.unsolved_captcha.save()
-##	elif num_proposoals >= 3:
-#	    if most_common[0][1] >= 3:
-#		self.unsolved_captcha.resolved = True
-#		self.unsolved_captcha.result = most_common[0][0]
-#		self.unsolved_captcha.save()
-
     def validate(self, params):
         result = params.get('result', None).strip()
         try:
@@ -276,7 +261,7 @@ class ImageCaptchaSession(CaptchaSession):
 	    for index, element in enumerate(self.order):
 		if (element == 1):
 		    self.image_token_list[index].add_proposal(result[index])
-		    self.image_token_list[index].try_solve()
+#		    self.image_token_list[index].try_solve()
 
 	return JsonResponse({'valid' : valid})
 	
