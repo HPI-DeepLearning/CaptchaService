@@ -19,10 +19,10 @@ def request(request):
     remote_ip = get_ip(request)
 
     captcha_type = randint(0,1)
-    if captcha_type == 1:
-        session = ImageCaptchaSession()
-    else:
-        session = TextCaptchaSession()
+#    if captcha_type == 1:
+#        session = ImageCaptchaSession()
+#    else:
+    session = TextCaptchaSession()
 
     session, response = session.create(remote_ip)
     session.save()
@@ -55,6 +55,7 @@ def upload(request):
     solved = params.get('textsolution', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
+    folder_name = data_folder.name.split(".")[0]
     #TODO task
 
     #TODO test if its zipfile
@@ -64,8 +65,14 @@ def upload(request):
     except KeyError:
 	print 'Error: Could not extract Zip'
 
-    path = 'temp/captchas/'
+    path = 'temp/' + folder_name+ '/'
     listing = os.listdir(path)
+    txtfile = ''
+    for file in listing:
+	if file.endswith(".txt"):
+	    txtfile = file
+    if txtfile == '':
+	raise IOError('No solution file found')
 
     if (solved == "unsolved"):
 	for file in listing:
@@ -74,15 +81,15 @@ def upload(request):
 	    if (captchatype == 'imagecaptcha'):
 #		image_data = im.read()
 		token = ImageCaptchaToken()
-	        token.create(file, image_data, 0, "testtask7") #TODO task
+		token.create(file, image_data, 0, "testtask7") #TODO task
 	    elif (captchatype == 'textcaptcha'):
 #		image_data = image_distortion.processImage(im)
 		token = TextCaptchaToken()
-	        token.create(file, image_data, 0, 'testtext')
+		token.create(file, image_data, 0, 'testtext')
 	    token.save()
 	    im.close()
     elif (solved == "solved"):
-	for file_name, solution in _yield_captcha_solutions():
+	for file_name, solution in _yield_captcha_solutions(path, txtfile):
 	    im = open(path + file_name, 'rb')
 	    image_data = im.read()
 	    im.close()
@@ -119,10 +126,11 @@ def _retrieve_corresponding_session(session_key, request):
 
     return session
 
-def _yield_captcha_solutions():
-    with open('temp/captchas.txt', 'r') as f:
+def _yield_captcha_solutions(path, txtfile):
+    with open(path + txtfile, 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
+	    print(file_name)
 	    solution = solution.strip()
 	    yield file_name, solution
 
