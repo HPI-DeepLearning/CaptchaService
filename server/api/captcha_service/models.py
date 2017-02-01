@@ -236,22 +236,10 @@ class ImageCaptchaSession(CaptchaSession):
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
-	#create order with exactly 4 solved tokens, 1 -> solved, 0 -> unsolved
-	self.order = [0] * 9
-	i = 0
-	while (i < 4):
-	    index_solved = randint(0,8)
-	    if(self.order[index_solved] == 0):
-		self.order[index_solved] = 1
-		i += 1
-
-	#chose task	
-	aux = ImageCaptchaToken.objects.all()
-	count = aux.count()
-	index = randint(0,count-1)
-	self.task = aux[index].task
+	self.order = self.create_order()
+	self.task = self.get_task()
 	
-	self.image_token_list = self.get_image_token_list(self.order)
+	self.image_token_list = self.get_image_token_list()
 	url_list = []
 	for i in range(len(self.image_token_list)):
 	    url_list.append(self.image_token_list[i].file.url)
@@ -284,9 +272,10 @@ class ImageCaptchaSession(CaptchaSession):
 	
 
     def renew(self):
-	self.task = None
-	self.image_token_list = self.get_image_token_list(self.order)
-
+	self.order = self.create_order()
+	self.task = self.get_task()
+	print self.task
+	self.image_token_list = self.get_image_token_list()
 	url_list = []
 	for i in range(len(self.image_token_list)): 
 	    url_list.append(self.image_token_list[i].file.url)
@@ -296,15 +285,14 @@ class ImageCaptchaSession(CaptchaSession):
 				 'task' : self.task,
 	                     	'type': 'image'})
 
-    def get_image_token_list(self, order_list):
+    def get_image_token_list(self):
 	token_list = []
 	current_token = models.ForeignKey(
         ImageCaptchaToken,
         on_delete=models.PROTECT,
     )
 
-	for boolean in order_list:
-<<<<<<< HEAD
+	for boolean in self.order:
 	    if (boolean == 1):
 		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
 	    else:
@@ -314,3 +302,23 @@ class ImageCaptchaSession(CaptchaSession):
 	    current_token = image_tokens[current_token_index]
 	    token_list.append(current_token)
 	return token_list
+
+    @staticmethod
+    def create_order():
+    #create order with exactly 4 solved tokens, 1 -> solved, 0 -> unsolved
+	order_list = [0] * 9
+	i = 0
+	while (i < 4):
+	    index_solved = randint(0,8)
+	    if(order_list[index_solved] == 0):
+		order_list[index_solved] = 1
+		i += 1
+	return order_list
+
+    @staticmethod
+    def get_task():
+	aux = ImageCaptchaToken.objects.all()
+	count = aux.count()
+	index = randint(0,count-1)
+	return aux[index].task
+
