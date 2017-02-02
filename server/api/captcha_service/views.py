@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponse
 from django.http import JsonResponse
 from django.core.management import call_command
 from rest_framework.response import Response
@@ -118,8 +118,12 @@ def download(request):
     # TODO test if task is working 
     if (captchatype == 'imagecaptcha'): 
 	requested_task = params.get('task', None)
- 
-       
+    file_path = 'static/captchas/'
+    storage_path = 'tempdownload/'
+    if not (os.path.exists(storage_path)):
+	    os.makedirs(storage_path)
+
+  
     # create list of tokens, that need to be included in zipfile
     file_name_list = []
     if (resolved == False):
@@ -127,7 +131,7 @@ def download(request):
 	    token_list = ImageCaptchaToken.objects.all().filter(resolved=False).filter(task=requested_task)
         elif (captchatype == 'textcaptcha'):
 	    token_list = TextCaptchaToken.objects.all().filter(resolved=False)
-    else:
+    else (resolved == True):
 	if (captchatype == 'imagecaptcha'):
 	    token_list = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=requested_task)
         elif (captchatype == 'textcaptcha'):
@@ -135,13 +139,13 @@ def download(request):
 
     for token in token_list:
 	file_name_list.append(token.file.name)
-    _create_zipfile('static/captchas/', file_name_list, resolved)
-	# fix for Linux zip files read in Windows TODO test
-	#for file in zipf.filelist:
-	#    file.create_system = 0
-    	
-    executed = "exec"
-    return JsonResponse({'executed': executed})
+    _create_zipfile(file_path, file_name_list, resolved, storage_path)
+   
+    zipf = open(storage_path + 'captchas.zip') 
+    response = HttpResponse(zipf, content_type=storage_path+'captchas.zip')
+    response['Content-Disposition'] = 'attachment; filename="%s"' % 'captchas.zip'
+    shutil.rmtree('tempdownload')
+    return response
  
 def _retrieve_corresponding_session(session_key, request):
     try:
@@ -171,27 +175,23 @@ def _any_parameter_unset(*keys):
                 return True
         return False
 
-def _create_zipfile(path, file_name_list, resolved):
-    zipf = zipfile.ZipFile('captchas.zip', 'w', zipfile.ZIP_DEFLATED)
-    solutiontxt_path = 'tempdownload/'
+def _create_zipfile(file_path, file_name_list, resolved, storage_path):
+    zipf = zipfile.ZipFile(storage_path+'captchas.zip', 'w', zipfile.ZIP_DEFLATED)
+    storage_path = 'tempdownload/'
     solutiontxt_name = 'CaptchaSolutions.txt'
     
     if (resolved == True):
-	solutiontxt_path = 'tempdownload/'
 	solutiontxt_name = 'CaptchaSolutions.txt'
-	if not (os.path.exists(solutiontxt_path)):
-	    os.makedirs(solutiontxt_path)
-	solutiontxt = open(solutiontxt_path + solutiontxt_name, 'w')		
+ 	solutiontxt = open(storage_path + solutiontxt_name, 'w')		
     
     for element in file_name_list:
-	zipf.write(element, 'captchas/'+os.path.basename(path+'captchas/'+element)) # second argument defines location of element 
+	zipf.write(element, 'captchas/'+os.path.basename(file_path+element)) # second argument defines location of element 
 	# create txt with solutions for solved captchas
 	if (resolved == True):
 	    solution = CaptchaToken.objects.get(file=element).result
 	    solutiontxt.write(element + "; " + str(solution) + '\n')
-    solutiontxt.close()
-    zipf.write(solutiontxt_path + solutiontxt_name, os.path.basename(path+solutiontxt_name))
+    if (resolved == True):
+	solutiontxt.close()
+	zipf.write(storage_path + solutiontxt_name, os.path.basename(file_path+solutiontxt_name))
     zipf.close()
-    # TODO strucure of zip
-    shutil.rmtree('tempdownload')
-
+    # 
