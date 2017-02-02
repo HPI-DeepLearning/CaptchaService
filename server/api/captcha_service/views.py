@@ -57,9 +57,9 @@ def upload(request):
 
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
-    zf.extractall('temp')
+    zf.extractall('tempupload')
 
-    path = 'temp/captchas/'
+    path = 'tempupload/captchas/'
     listing = os.listdir(path)
 
     if (solved == "unsolved"):
@@ -89,7 +89,7 @@ def upload(request):
 
 
     call_command('collectstatic', verbosity=0, interactive=False)
-    shutil.rmtree('temp')
+    shutil.rmtree('tempupload')
     return HttpResponseRedirect('/')
 
 @api_view(['GET'])
@@ -101,26 +101,31 @@ def download(request):
 	resolved = False
     else:
 	resolved = True
-    #TODO task
-    
+    # TODO test if task is working 
+    if (captchatype == 'imagecaptcha'): 
+	requested_task = params.get('task', None)
+ 
+       
+    # create list of tokens, that need to be included in zipfile
     file_name_list = []
-    zipf = zipfile.ZipFile('captchas.zip', 'w', zipfile.ZIP_DEFLATED)
     if (resolved == False):
 	if (captchatype == 'imagecaptcha'):
-	    token_list = ImageCaptchaToken.objects.all().filter(resolved=False)
-        else:
+	    token_list = ImageCaptchaToken.objects.all().filter(resolved=False).filter(task=requested_task)
+        elif (captchatype == 'textcaptcha'):
 	    token_list = TextCaptchaToken.objects.all().filter(resolved=False)
-	
-	for token in token_list:
-	    file_name_list.append(token.file.name)
-	print file_name_list
-	_create_zipfile('static/captchas/', zipf, file_name_list)
+    else:
+	if (captchatype == 'imagecaptcha'):
+	    token_list = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=requested_task)
+        elif (captchatype == 'textcaptcha'):
+	    token_list = TextCaptchaToken.objects.all().filter(resolved=True)
+
+    for token in token_list:
+	file_name_list.append(token.file.name)
+    _create_zipfile('static/captchas/', file_name_list, resolved)
 	# fix for Linux zip files read in Windows TODO test
 	#for file in zipf.filelist:
 	#    file.create_system = 0
-	zipf.close()
-	
-	
+    	
     executed = "exec"
     return JsonResponse({'executed': executed})
  
@@ -138,7 +143,7 @@ def _retrieve_corresponding_session(session_key, request):
     return session
 
 def _yield_captcha_solutions():
-    with open('temp/captchas.txt', 'r') as f:
+    with open('tempupload/captchas.txt', 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
 	    solution = solution.strip()
@@ -151,8 +156,27 @@ def _any_parameter_unset(*keys):
                 return True
         return False
 
-def _create_zipfile(path, ziph, file_name_list):
-    #ziph is zipfile handle
-    print len(file_name_list)
+def _create_zipfile(path, file_name_list, resolved):
+    zipf = zipfile.ZipFile('captchas.zip', 'w', zipfile.ZIP_DEFLATED)
+    solutiontxt_path = 'tempdownload/'
+    solutiontxt_name = 'CaptchaSolutions.txt'
+    
+    if (resolved == True):
+	solutiontxt_path = 'tempdownload/'
+	solutiontxt_name = 'CaptchaSolutions.txt'
+	if not (os.path.exists(solutiontxt_path)):
+	    os.makedirs(solutiontxt_path)
+	solutiontxt = open(solutiontxt_path + solutiontxt_name, 'w')		
+    
     for element in file_name_list:
-	ziph.write( element, 'captchas/'+os.path.basename(path+element)) # second argument defines structure of zipfile
+	zipf.write(element, 'captchas/'+os.path.basename(path+'captchas/'+element)) # second argument defines location of element 
+	# create txt with solutions for solved captchas
+	if (resolved == True):
+	    solution = CaptchaToken.objects.get(file=element).result
+	    solutiontxt.write(element + "; " + str(solution) + '\n')
+    solutiontxt.close()
+    zipf.write(solutiontxt_path + solutiontxt_name, os.path.basename(path+solutiontxt_name))
+    zipf.close()
+    # TODO strucure of zip
+    shutil.rmtree('tempdownload')
+

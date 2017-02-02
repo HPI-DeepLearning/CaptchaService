@@ -139,7 +139,6 @@ class TextCaptchaSession(CaptchaSession):
                              'second_url': second_url,
                              'session_key': self.session_key,
 	                     'type': 'text'})
-
 	return self, response
 
 #    def try_solve(self):
@@ -226,7 +225,7 @@ class TextCaptchaSession(CaptchaSession):
 
 class ImageCaptchaSession(CaptchaSession):
 
-    #order is a list with 0->solved_captcha_token, 1->unsolved_captcha_token
+    #order is a list with 1->solved_captcha_token, 0->unsolved_captcha_token
     order = SeparatedValuesField() # customField for saving lists in django
  
     #list with stored captcha_token
@@ -248,25 +247,47 @@ class ImageCaptchaSession(CaptchaSession):
 				 'task' : self.task,
 				 'session_key': self.session_key,
 	                     	 'type': 'image'})
+	
 	return self, response
 
     def validate(self, params):
-	result = params.get('result', None)
+	# get result to be bool array 
+	result_string = params.get('result', None)
+	result = result_string.split(",")
+	for index, element in enumerate(result):
+	    if element == '1':
+		result[index] = True
+	    else: 
+		result[index] = False
+		image_token_list_rebuild = []
 
+	number_of_elements_per_token = 3 
+	self.image_token_list = self.rebuild_image_token_list(number_of_elements_per_token)
+	
 	if self._any_parameter_unset(self.session_key, result):
 	    return Response(status=status.HTTP_400_BAD_REQUEST)
+	
+	# validation
 
+	for token in self.image_token_list:
+	    if (token[number_of_elements_per_token-1] == 'True'):
+		token[number_of_elements_per_token-1] = True
+	    else: 
+		token[number_of_elements_per_token-1] = False
+	
 	valid = True
 	for index, element in enumerate(self.order):
-	    if(element == 0):
-		if not (result[index] == self.image_token_list[index].result):
-		    valid = False
+	    if(element == '1' and result[index] != self.image_token_list[index][number_of_elements_per_token-1]):
+		valid = False
 	
+	# proposals 
 	if (valid == True):
 	    for index, element in enumerate(self.order):
-		if (element == 1):
-		    self.image_token_list[index].add_proposal(result[index])
-		    self.image_token_list[index].try_solve()
+		if (element == '0'):
+		    current_token_pk = self.image_token_list[index][0]
+		    current_token = CaptchaToken.objects.get(pk=current_token_pk)
+		    current_token.add_proposal(result[index])
+		    current_token.try_solve()
 
 	return JsonResponse({'valid' : valid})
 	
@@ -274,7 +295,6 @@ class ImageCaptchaSession(CaptchaSession):
     def renew(self):
 	self.order = self.create_order()
 	self.task = self.get_task()
-	print self.task
 	self.image_token_list = self.get_image_token_list()
 	url_list = []
 	for i in range(len(self.image_token_list)): 
@@ -322,3 +342,19 @@ class ImageCaptchaSession(CaptchaSession):
 	index = randint(0,count-1)
 	return aux[index].task
 
+    def rebuild_image_token_list(self, number_of_elements_per_token):
+	# custom field used for storing image_token_list doesnt save correct structure of ImageCaptchaToken
+	# e.g. [<ImageCaptchaToken: 1155, image, True>] is saved as [1155, image, True]
+	# workaround to rebuild normal structure
+
+	rebuild_image_token_list = []
+	auxlist = []
+	i = 0
+	for element in self.image_token_list:
+	   auxlist.append(element.strip())
+	   i += 1
+	   if (i == number_of_elements_per_token):
+		rebuild_image_token_list.append(auxlist)
+		auxlist = []
+		i = 0
+	return rebuild_image_token_list
