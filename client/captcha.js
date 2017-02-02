@@ -279,6 +279,7 @@ var handleResponse = function (response) {
                 var xhr = e.target;
                 if (xhr.responseType === 'json') {
                     response = xhr.response;
+                    console.log(response);
                     reactOnValidationResponse(response);
                 } else {
                     response = JSON.parse(xhr.responseText); // IE bug fix
