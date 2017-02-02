@@ -68,7 +68,7 @@ class ImageCaptchaToken(CaptchaToken):
     task = models.CharField(max_length=128)
     result = models.BooleanField(default=False)
 
-    def create(self, file_name, file_data, resolved, task, result=False): 
+    def create(self, file_name, file_data, resolved, task, result=False):
         super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
 	self.task = task
         self.result = result
@@ -141,29 +141,16 @@ class TextCaptchaSession(CaptchaSession):
 	                     'type': 'text'})
 	return self, response
 
-#    def try_solve(self):
-#	proposals = self.unsolved_captcha.proposals
-#	most_common = proposals.most_common()
-#	num_proposoals = sum(proposals.values())
-#
-#	if num_proposoals >= 6:
-#	    self.unsolved_captcha.insolvable = True
-#	    self.unsolved_captcha.resolved = True
-#	    self.unsolved_captcha.save()
-##	elif num_proposoals >= 3:
-#	    if most_common[0][1] >= 3:
-#		self.unsolved_captcha.resolved = True
-#		self.unsolved_captcha.result = most_common[0][0]
-#		self.unsolved_captcha.save()
-
     def validate(self, params):
         result = params.get('result', None).strip()
         try:
             first_result, second_result = result.split(' ')
 	except:
 	    first_result, second_result = None, None
-	if self._any_parameter_unset(self.session_key, first_result, second_result):
+	if self._any_parameter_unset(self.session_key):
 	    return Response(status=status.HTTP_400_BAD_REQUEST)
+        if self._any_parameter_unset(first_result, second_result):
+            return JsonResponse({'valid': False})
 	# validate input
 	if self.order == 0 and self.solved_captcha.result.strip() == first_result.strip() or self.order == 1 and self.solved_captcha.result.strip() == second_result.strip():
 
@@ -212,7 +199,7 @@ class TextCaptchaSession(CaptchaSession):
 	count = text_tokens.count()
 	solved_captcha_index = randint(0, count-1)
         solved = text_tokens[solved_captcha_index]
-        return solved, unsolved 
+        return solved, unsolved
 
     def _adjust_captchas_to_order(self):
 	if self.order == 0:
@@ -227,9 +214,9 @@ class ImageCaptchaSession(CaptchaSession):
 
     #order is a list with 1->solved_captcha_token, 0->unsolved_captcha_token
     order = SeparatedValuesField() # customField for saving lists in django
- 
+
     #list with stored captcha_token
-    image_token_list = SeparatedValuesField() 
+    image_token_list = SeparatedValuesField()
     task = models.TextField(null=True)
 
     def create(self, remote_ip):
@@ -237,7 +224,7 @@ class ImageCaptchaSession(CaptchaSession):
 
 	self.order = self.create_order()
 	self.task = self.get_task()
-	
+
 	self.image_token_list = self.get_image_token_list()
 	url_list = []
 	for i in range(len(self.image_token_list)):
@@ -290,14 +277,14 @@ class ImageCaptchaSession(CaptchaSession):
 		    current_token.try_solve()
 
 	return JsonResponse({'valid' : valid})
-	
+
 
     def renew(self):
 	self.order = self.create_order()
 	self.task = self.get_task()
 	self.image_token_list = self.get_image_token_list()
 	url_list = []
-	for i in range(len(self.image_token_list)): 
+	for i in range(len(self.image_token_list)):
 	    url_list.append(self.image_token_list[i].file.url)
 
 	self.save(force_update=True)

@@ -13,6 +13,7 @@ import uuid
 import zipfile
 import shutil
 import os
+import image_distortion
 
 @api_view(['GET'])
 def request(request):
@@ -53,29 +54,42 @@ def upload(request):
     task = params.get('task', None)
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
+    folder_name = data_folder.name.split(".")[0]
     print task
 
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
     zf.extractall('tempupload')
 
-    path = 'tempupload/captchas/'
+    path = 'tempupload/' + folder_name+ '/'
     listing = os.listdir(path)
+    txtfile = ''
+    for file in listing:
+	if file.endswith(".txt"):
+	    txtfile = file
+    if txtfile == '':
+	raise IOError('No solution file found')
 
     if (solved == "unsolved"):
 	for file in listing:
 	    im = open(path + file, 'rb')
 	    image_data = im.read()
-	    im.close()
+	    if file.endswith(".txt"):
+		continue	
 	    if (captchatype == 'imagecaptcha'):
+#		im = open(path + file, 'rb')
+#		image_data = im.read()
 		token = ImageCaptchaToken()
 	        token.create(file, image_data, 0, task)
 	    elif (captchatype == 'textcaptcha'):
+		file_path = path + file
+#		image_data = image_distortion.processImage(file_path)
 		token = TextCaptchaToken()
 	        token.create(file, image_data, 0)
 	    token.save()
+	    im.close()
     elif (solved == "solved"):
-	for file_name, solution in _yield_captcha_solutions():
+	for file_name, solution in _yield_captcha_solutions(path, txtfile):
 	    im = open(path + file_name, 'rb')
 	    image_data = im.read()
 	    im.close()
@@ -142,10 +156,11 @@ def _retrieve_corresponding_session(session_key, request):
 
     return session
 
-def _yield_captcha_solutions():
-    with open('tempupload/captchas.txt', 'r') as f:
+def _yield_captcha_solutions(path, txtfile):
+    with open(path + txtfile, 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
+	    print(file_name)
 	    solution = solution.strip()
 	    yield file_name, solution
 
