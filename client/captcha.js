@@ -5,9 +5,10 @@
 *
 */
 
-var captchaSolved = false,
-    HTMLOverlay = {
-        text: '<div class="overlay">' +
+
+var captchaSolved = false, /* if set to true form gets submitted on form button click - if set to false captcha overlay gets summoned */
+    HTMLOverlay = { /* HTML markup for each captcha type supported. You should only adjust the content of the .captcha-content element */
+        text: '<div class="overlay">' + /* in order to support more captcha types in future! */
           '<div class="captcha-card">' +
             '<div class="captcha-content">' +
                 '<div class="captcha-image-container">' +
@@ -16,8 +17,8 @@ var captchaSolved = false,
                 '</div>' +
                 '<div class="captcha-input"><input type="text" placeholder="Answer..."></input></div>' +
                 '<div class="captcha-actions">' +
-                    '<a href="#" id="submit">Submit</a>' +
-                    '<a href="#" id="refresh"><i class="fa fa-refresh">refresh</i></a>' +
+                    '<a href="#" id="submit"><svg viewBox="0 0 7 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;"><path id="paper-plane-o" d="M6.615,0.042c0.079,0.056 0.117,0.146 0.102,0.24l-0.96,5.76c-0.012,0.071 -0.056,0.131 -0.12,0.169c-0.034,0.019 -0.075,0.03 -0.116,0.03c-0.03,0 -0.06,-0.008 -0.09,-0.019l-1.977,-0.806l-1.117,1.226c-0.045,0.053 -0.109,0.079 -0.176,0.079c-0.03,0 -0.06,-0.004 -0.086,-0.015c-0.094,-0.038 -0.154,-0.128 -0.154,-0.225l0,-1.695l-1.77,-0.724c-0.086,-0.034 -0.143,-0.113 -0.15,-0.206c-0.008,-0.09 0.041,-0.177 0.12,-0.222l6.24,-3.6c0.078,-0.048 0.18,-0.045 0.255,0.008l-0.001,0Zm-1.282,5.621l0.829,-4.961l-5.378,3.101l1.26,0.514l3.236,-2.396l-1.792,2.989l1.845,0.753Z" style="fill:#bebebe;fill-rule:nonzero;"/></svg></a>' +
+                    '<a href="#" id="refresh"><svg viewBox="0 0 6 6" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;"><path id="refresh" d="M5.666,3.48c0,0.007 0,0.019 -0.003,0.026c-0.319,1.328 -1.414,2.254 -2.798,2.254c-0.731,0 -1.44,-0.289 -1.972,-0.795l-0.484,0.484c-0.045,0.045 -0.105,0.071 -0.169,0.071c-0.131,0 -0.24,-0.109 -0.24,-0.24l0,-1.68c0,-0.131 0.109,-0.24 0.24,-0.24l1.68,0c0.131,0 0.24,0.109 0.24,0.24c0,0.064 -0.026,0.124 -0.071,0.169l-0.514,0.514c0.352,0.33 0.821,0.517 1.305,0.517c0.667,0 1.286,-0.345 1.635,-0.915c0.09,-0.146 0.135,-0.289 0.199,-0.439c0.018,-0.052 0.056,-0.086 0.112,-0.086l0.72,0c0.068,0 0.12,0.056 0.12,0.12l0,0Zm0.094,-3l0,1.68c0,0.131 -0.108,0.24 -0.24,0.24l-1.68,0c-0.131,0 -0.24,-0.109 -0.24,-0.24c0,-0.064 0.026,-0.124 0.072,-0.169l0.517,-0.517c-0.356,-0.33 -0.825,-0.514 -1.309,-0.514c-0.667,0 -1.286,0.345 -1.635,0.915c-0.09,0.146 -0.135,0.289 -0.199,0.439c-0.018,0.052 -0.056,0.086 -0.112,0.086l-0.746,0c-0.068,0 -0.12,-0.056 -0.12,-0.12l0,-0.026c0.322,-1.331 1.428,-2.254 2.812,-2.254c0.735,0 1.452,0.293 1.984,0.795l0.488,-0.484c0.044,-0.045 0.105,-0.071 0.168,-0.071c0.132,0 0.24,0.109 0.24,0.24l0,0Z" style="fill:#bebebe;fill-rule:nonzero;"/></svg></a>' +
                 '</div>' +
             '</div>' +
           '</div>' +
@@ -35,7 +36,8 @@ var captchaSolved = false,
                     '<input name="captcha" type="checkbox" id="image9" class="input"/><label for="image9" class="label" ><img alt="captcha_image9"></label>' +
                 '</div></div>' +
                 '<div class="captcha-actions">' +
-                    '<a href="#" id="submit">Submit</a><a href="#" id="refresh"><i class="fa fa-refresh">refresh</i></a>' +
+                    '<a href="#" id="submit"><svg viewBox="0 0 7 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;"><path id="paper-plane-o" d="M6.615,0.042c0.079,0.056 0.117,0.146 0.102,0.24l-0.96,5.76c-0.012,0.071 -0.056,0.131 -0.12,0.169c-0.034,0.019 -0.075,0.03 -0.116,0.03c-0.03,0 -0.06,-0.008 -0.09,-0.019l-1.977,-0.806l-1.117,1.226c-0.045,0.053 -0.109,0.079 -0.176,0.079c-0.03,0 -0.06,-0.004 -0.086,-0.015c-0.094,-0.038 -0.154,-0.128 -0.154,-0.225l0,-1.695l-1.77,-0.724c-0.086,-0.034 -0.143,-0.113 -0.15,-0.206c-0.008,-0.09 0.041,-0.177 0.12,-0.222l6.24,-3.6c0.078,-0.048 0.18,-0.045 0.255,0.008l-0.001,0Zm-1.282,5.621l0.829,-4.961l-5.378,3.101l1.26,0.514l3.236,-2.396l-1.792,2.989l1.845,0.753Z" style="fill:#bebebe;fill-rule:nonzero;"/></svg></a>' +
+                    '<a href="#" id="refresh"><svg viewBox="0 0 6 6" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;"><path id="refresh" d="M5.666,3.48c0,0.007 0,0.019 -0.003,0.026c-0.319,1.328 -1.414,2.254 -2.798,2.254c-0.731,0 -1.44,-0.289 -1.972,-0.795l-0.484,0.484c-0.045,0.045 -0.105,0.071 -0.169,0.071c-0.131,0 -0.24,-0.109 -0.24,-0.24l0,-1.68c0,-0.131 0.109,-0.24 0.24,-0.24l1.68,0c0.131,0 0.24,0.109 0.24,0.24c0,0.064 -0.026,0.124 -0.071,0.169l-0.514,0.514c0.352,0.33 0.821,0.517 1.305,0.517c0.667,0 1.286,-0.345 1.635,-0.915c0.09,-0.146 0.135,-0.289 0.199,-0.439c0.018,-0.052 0.056,-0.086 0.112,-0.086l0.72,0c0.068,0 0.12,0.056 0.12,0.12l0,0Zm0.094,-3l0,1.68c0,0.131 -0.108,0.24 -0.24,0.24l-1.68,0c-0.131,0 -0.24,-0.109 -0.24,-0.24c0,-0.064 0.026,-0.124 0.072,-0.169l0.517,-0.517c-0.356,-0.33 -0.825,-0.514 -1.309,-0.514c-0.667,0 -1.286,0.345 -1.635,0.915c-0.09,0.146 -0.135,0.289 -0.199,0.439c-0.018,0.052 -0.056,0.086 -0.112,0.086l-0.746,0c-0.068,0 -0.12,-0.056 -0.12,-0.12l0,-0.026c0.322,-1.331 1.428,-2.254 2.812,-2.254c0.735,0 1.452,0.293 1.984,0.795l0.488,-0.484c0.044,-0.045 0.105,-0.071 0.168,-0.071c0.132,0 0.24,0.109 0.24,0.24l0,0Z" style="fill:#bebebe;fill-rule:nonzero;"/></svg></a>' +
                 '</div></div></div>'
     },
     insertSessionKey = function(key) {
@@ -292,10 +294,12 @@ var handleResponse = function (response) {
 
     // Enter on text input should submit it
     var textInput = document.querySelectorAll(".captcha-input > input")[0];
-    textInput.addEventListener('keypress', function (e) {
-        var key = e.which || e.keyCode;
-        if (key === 13) { // 13 is enter
-          document.getElementById('submit').click();
+    if (textInput){
+        textInput.addEventListener('keypress', function (e) {
+            var key = e.which || e.keyCode;
+            if (key === 13) { // 13 is enter
+              document.getElementById('submit').click();
+            };
+        });
     };
-});
 }

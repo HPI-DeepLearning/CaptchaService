@@ -1,3 +1,13 @@
+
+.captcha-actions a {
+    text-decoration: none;
+    margin: 20px 3%;
+}
+.captcha-actions a svg {
+    width: 5%;
+    height: 5%;
+}
+
 /* Overlay styles */
 .overlay {
     position: absolute;
@@ -37,37 +47,33 @@
     box-sizing: border-box;
     background: rgb(69,90,100);
     background: rgba(69,90,100,.9);
-    border-width: 3px;
-    border-style: solid;
-    -webkit-border-image:
-      -webkit-gradient(linear, 0 0, 0 100%, from(rgb(2,164,153)), to(rgb(199,51,72))) 1 100%;
-    -webkit-border-image:
-      -webkit-linear-gradient(rgb(2,164,153), rgb(199,51,72)) 1 100%;
-    -moz-border-image:
-      -moz-linear-gradient(rgb(2,164,153), rgb(199,51,72)) 1 100%;
-    -o-border-image:
-      -o-linear-gradient(rgb(2,164,153), rgb(199,51,72)) 1 100%;
-    border-image:
-      linear-gradient(to bottom, rgb(2,164,153), rgb(199,51,72)) 1 100%;
+    border-radius: 3%;
     border-bottom: 3px solid rgb(199,51,72);
     border-top: 3px solid rgb(2,164,153);
+    transition: all .2s ease-in-out;
+    box-shadow: 0 5px 8px 0 #333;
+}
+
+.captcha-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 20px rgba(0, 0, 0, 0.2);
 }
 
 @keyframes shake {
   10%, 90% {
-    transform: translate3d(-3px, 0, 0);
+    transform: translateX(-3px);
   }
 
   20%, 80% {
-    transform: translate3d(4px, 0, 0);
+    transform: translateX(4px);
   }
 
   30%, 50%, 70% {
-    transform: translate3d(-6px, 0, 0);
+    transform: translateX(-6px);
   }
 
   40%, 60% {
-    transform: translate3d(6px, 0, 0);
+    transform: translateX(6px);
   }
 }
 
