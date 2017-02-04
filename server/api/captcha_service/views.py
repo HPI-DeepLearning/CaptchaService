@@ -131,7 +131,7 @@ def download(request):
 	    token_list = ImageCaptchaToken.objects.all().filter(resolved=False).filter(task=requested_task)
         elif (captchatype == 'textcaptcha'):
 	    token_list = TextCaptchaToken.objects.all().filter(resolved=False)
-    else (resolved == True):
+    elif (resolved == True):
 	if (captchatype == 'imagecaptcha'):
 	    token_list = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=requested_task)
         elif (captchatype == 'textcaptcha'):
