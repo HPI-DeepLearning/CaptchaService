@@ -151,6 +151,11 @@ def download(request):
     response['Content-Disposition'] = 'attachment; filename="%s"' % 'captchas.zip'
     shutil.rmtree('tempdownload')
     return response
+
+@api_view(['GET'])
+def getTask(request):
+    task_list = ImageCaptchaToken.objects.order_by().values('task').distinct()
+    return JsonResponse({'task_list' : task_list})
  
 def _retrieve_corresponding_session(session_key, request):
     try:
