@@ -51,7 +51,7 @@ class TextCaptchaToken(CaptchaToken):
 	most_common = proposals.most_common()
 	num_proposoals = sum(proposals.values())
 
-	if num_proposoals >= 6:
+	if len(proposals.values()) >= 6: #more than six different proposals
 	    self.insolvable = True
 	    self.resolved = True
 	    self.save()
@@ -295,9 +295,9 @@ class ImageCaptchaSession(CaptchaSession):
     def get_image_token_list(self):
 	token_list = []
 	current_token = models.ForeignKey(
-        ImageCaptchaToken,
-        on_delete=models.PROTECT,
-    )
+	    ImageCaptchaToken,
+	    on_delete=models.PROTECT,
+	)
 
 	for boolean in self.order:
 	    if (boolean == 1):
