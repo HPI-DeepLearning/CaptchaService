@@ -27,31 +27,32 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<h1>Captcha Service</h1>
+					<h3>Captcha Service</h3>
 					<p>
 						<small>Marvin Gorecki, Alexander Kromer, Hendrik Rätz, Robert Stark</small>
 					</p>
 				</section>
 
 				<section>
-					<h3>Motivation</h3>
+					<h5>Motivation</h5>
 					<p>Data Labeling for researchers and scientists!</p>
 				</section>
 
 				<section>
-					<h3>Captcha Architecture</h3>
-					<p>Easy integration of new captchas and tasks</p>
+					<h5>Captcha Architecture</h5>
+					<!-- <p>Easy integration of new captchas and tasks</p> -->
 					<img src="images/Captcha_architektur.png" width="100%">
 				</section>
 
 				<section>
-					<h3>
-						<a href="http://127.0.0.1:8000/accounts/login/" data-preview-link>Log In</a>
-					</h3>
+					<h5>Captcha Webinterface</h5>
+					<div class="stretch">
+						<iframe src="http://127.0.0.1:8000/accounts/login/" height="100%" width="100%"></iframe>
+					</div>
 				</section>
 
 				<section>
-					<h3>Captcha Integration in Webservice</h3>
+					<h5>Captcha Integration in Webservice</h5>
 					<pre><code class="hljs" data-trim contenteditable>
 						function linkify( selector ) {
 						  if( supports3DTransforms ) {
@@ -70,18 +71,19 @@
 				</section>
 
 				<section>
-					<h3>Communication with Captcha-Service</h3>
+					<h5>Communication with Captcha-Service</h5>
 					<img src="images/Kommunikation.png" width="100%">
 				</section>
 
 				<section>
-					<h3>
-						<a href="http://captcha-service.appspot.com/" data-preview-link>Captcha Demo</a>
-					</h3>
+					<h5>Captcha Demo</h5>
+					<div class="stretch">
+						<iframe src="http://captcha-service.appspot.com/" height="100%" width="100%"></iframe>
+					</div>
 				</section>
 
 				<section>
-					<h3>Solving algorithm</h3>
+					<h5>Solving algorithm</h5>
 					<table>
 						<thead>
 							<tr>
@@ -94,27 +96,30 @@
 							<tr>
 								<td>solved</td>
 								<td>3 identical sol.</td>
-								<td>3 identical sol.</td>
+								<td>4 identical sol.</td>
 							</tr>
 							<tr>
 								<td>unsolvable</td>
 								<td>6 unique sol.</td>
-								<td>6 unique sol.</td>
+								<td>6 attempts</td>
 							</tr>
 						</tbody>
 					</table>
 				</section>
 
 				<section>
-					<h3>
-						<a href="http://127.0.0.1:8000/download/" data-preview-link>Log In</a>
-					</h3>
+					<h5>Captcha Webinterface</h5>
+					<div class="stretch">
+						<iframe src="http://127.0.0.1:8000/download/" height="100%" width="100%"></iframe>
+					</div>
 				</section>
 
 				<section>
-					<h3>Outlook</h3>
-					<p>more Captchas, e.g. splitting one image into smaller fragments</p>
-					<p>improve filter for downloads and analysis</p>
+					<h5>Outlook</h5>
+					<ul>
+						<li>different Captcha types</li>
+						<li>improve filter for downloads and analysis</li>
+					</ul>
 				</section>
 
 				<section>
