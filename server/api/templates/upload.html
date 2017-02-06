@@ -8,56 +8,91 @@
 		<div class="row">
 			<h5>Select which captcha type you would like to upload.</h5>
 			<div class="col s12">
-			    <p>
-			  		<input name="captchatype" type="radio" id="textcaptcha" value="textcaptcha" checked />
-			      	<label for="textcaptcha">Text-Captcha</label>
+				<p>
+					<input name="captchatype" type="radio" id="textcaptcha" value="textcaptcha" checked />
+					<label for="textcaptcha">Text-Captcha</label>
 				</p>
-			    <p>
+				<p>
 					<input name="captchatype" type="radio" id="imagecaptcha" value="imagecaptcha" />
 					<label for="imagecaptcha">Image-Captcha</label>
-			    </p>
+				</p>
 			</div>
 		</div>
 
 		<div class="row">
 			<h5>Choose the status of the captchas.</h5>
 			<div class="col s12">
-			    <p>
+				<p>
 					<input name="textsolution" type="radio" id="unsolved" value="unsolved" checked />
 					<label for="unsolved">Unsolved</label>
-			    </p>
-			    <p>
-			  		<input name="textsolution" type="radio" id="solved" value="solved" />
-			      	<label for="solved">Solved</label>
+				</p>
+				<p>
+					<input name="textsolution" type="radio" id="solved" value="solved" />
+					<label for="solved">Solved</label>
 				</p>
 			</div>
 		</div>
 
 		<div class="row">
 			<div class="col s12 m8">
-			    <div class="file-field input-field">
-			      <div class="btn">
-			        <span>Captcha file</span>
-			        <input name="files" type="file" value="captchafiles">
-			      </div>
-			      <div class="file-path-wrapper">
-			        <input class="file-path validate" type="text" placeholder="Upload a zip file">
-			      </div>
-			    </div>
+				<div class="file-field input-field">
+					<div class="btn">
+						<span>Captcha file</span>
+						<input name="files" type="file" value="captchafiles">
+					</div>
+					<div class="file-path-wrapper">
+						<input class="file-path validate" type="text" placeholder="Upload a zip file">
+					</div>
+				</div>
 			</div>
 		</div>
 
-		<div class="row" id="imagetask" style="display: none">
+<!-- 		<div class="row" id="imagetask" style="display: none">
 			<div class="input-field col s12 m8">
-	        	<input name="task" placeholder="Platypus" id="task" type="text" class="validate">
-	        	<label for="task">What is the user's task?</label>
-	        </div>
-	    </div>
+				<input name="task" placeholder="Platypus" id="task" type="text" class="validate">
+				<label for="task">What is the user's task?</label>
+			</div>
+		</div> -->
+
+
+		<div class="row" id="imagetask" style="display: none">
+			<div class="col s5 m4 l3">
+				<a class="waves-effect waves-light btn" href="#newtask">Add new task</a>
+			</div>
+			<div class="col s7 m8 l9">
+				<div class="input-field">
+				    <select id="taskselect">
+			      		<option value="" disabled selected>Choose your task</option>
+		      			<option value="brontosaurus">brontosaurus</option>
+			      			<option value="Platypus">Platypus</option>
+				    </select>
+				    <label>Image Task</label>
+			  	</div>
+			</div>
+		</div>
+
+
 
 		<button class="btn waves-effect waves-light right" type="submit" name="action">Submit
-	    	<i class="material-icons right">send</i>
-	  	</button>
+			<i class="material-icons right">send</i>
+		</button>
 	</form>
+
+	<!-- New task modal -->
+	<div id="newtask" class="modal">
+		<div class="modal-content">
+			<h4>Name for new image task</h4>
+			<p>What are users supposed to identify in your image captcha?</p>
+			<p>Please enter one keyword</p>
+			<div class="input-field">
+				<input id="taskname" type="text" class="validate">
+			<label for="taskname">Task Name</label>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button id="addtaskbtn" class="modal-action modal-close waves-effect waves-green btn-flat">Add new task</button>
+		</div>
+	</div>
 {% else %}
 	<div class="center">
 		<h4>Please log in or register.</h4>
