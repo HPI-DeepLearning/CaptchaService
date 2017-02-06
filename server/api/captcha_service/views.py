@@ -154,7 +154,10 @@ def download(request):
 
 @api_view(['GET'])
 def getTask(request):
-    task_list = ImageCaptchaToken.objects.order_by().values('task').distinct()
+    task_query_set = ImageCaptchaToken.objects.order_by().values('task').distinct()
+    task_list = []
+    for task in task_query_set:
+	task_list.append(task["task"])
     return JsonResponse({'task_list' : task_list})
  
 def _retrieve_corresponding_session(session_key, request):
