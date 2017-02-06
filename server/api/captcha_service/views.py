@@ -55,21 +55,26 @@ def upload(request):
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
     folder_name = data_folder.name.split(".")[0]
-    print task
+    temp_directory = 'tempupload/'
+
+    # delete leftovers in case something went wrong
+    if (os.path.exists(temp_directory)):
+	shutil.rmtree(temp_directory)
 
     #TODO test if its zipfile
     zf = zipfile.ZipFile(data_folder, 'r')
-    zf.extractall('tempupload')
+    zf.extractall(temp_directory)
 
-    path = 'tempupload/' + folder_name+ '/'
+    path = temp_directory + folder_name+ '/'
     listing = os.listdir(path)
+    listing_txt = os.listdir(temp_directory)
     txtfile = ''
-    for file in listing:
+    for file in listing_txt:
 	if file.endswith(".txt"):
 	    txtfile = file
-    if txtfile == '':
-	raise IOError('No solution file found')
-
+    if (solved == True):
+	if txtfile == '':
+	    raise IOError('No solution file found')
     if (solved == "unsolved"):
 	for file in listing:
 	    im = open(path + file, 'rb')
@@ -89,7 +94,7 @@ def upload(request):
 	    token.save()
 	    im.close()
     elif (solved == "solved"):
-	for file_name, solution in _yield_captcha_solutions(path, txtfile):
+	for file_name, solution in _yield_captcha_solutions(temp_directory, txtfile):
 	    im = open(path + file_name, 'rb')
 	    image_data = im.read()
 	    im.close()
@@ -146,6 +151,11 @@ def download(request):
     response['Content-Disposition'] = 'attachment; filename="%s"' % 'captchas.zip'
     shutil.rmtree('tempdownload')
     return response
+
+@api_view(['GET'])
+def getTask(request):
+    task_list = ImageCaptchaToken.objects.order_by().values('task').distinct()
+    return JsonResponse({'task_list' : task_list})
  
 def _retrieve_corresponding_session(session_key, request):
     try:
@@ -161,11 +171,14 @@ def _retrieve_corresponding_session(session_key, request):
     return session
 
 def _yield_captcha_solutions(path, txtfile):
+    print txtfile
+    print path + txtfile
     with open(path + txtfile, 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
-	    print(file_name)
 	    solution = solution.strip()
+	    print file_name
+	    print solution
 	    yield file_name, solution
 
 
@@ -194,4 +207,3 @@ def _create_zipfile(file_path, file_name_list, resolved, storage_path):
 	solutiontxt.close()
 	zipf.write(storage_path + solutiontxt_name, os.path.basename(file_path+solutiontxt_name))
     zipf.close()
-    # 

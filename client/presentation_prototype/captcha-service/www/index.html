@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset=utf-8 />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title></title>
+  <link rel="shortcut icon" href="/images/favicon-unlock-alt.ico">
+	<link rel="stylesheet" type="text/css" media="screen" href="/css/style.css" />
+	<script type="text/javascript" src="/js/jquery-2.1.1.min.js"></script>
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/captcha.css" />
+	<!--[if IE]>
+		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+	<![endif]-->
+</head>
+<body>
+    <div class="login-page">
+      <div class="form">
+        <form class="register-form">
+          <input type="text" placeholder="name"/>
+          <input type="password" placeholder="password"/>
+          <input type="text" placeholder="email address"/>
+          <button>create</button>
+          <p class="message">Already registered? <a href="#">Sign In</a></p>
+        </form>
+        <form class="login-form captcha-form" action="" method="post">
+          <input type="text" name="user" placeholder="username"/>
+          <input type="password" name="pw" placeholder="password"/>
+          <button class="captcha-button">login</button>
+          <p class="message">Not registered? <a href="#">Create an account</a></p>
+        </form>
+      </div>
+    </div>
+<script>
+$('.message a').click(function(){
+$('form').animate({height: "toggle", opacity: "toggle"}, "slow");
+});
+</script>
+<script type="text/javascript" src="/js/captcha.js"></script>
+</body>
+</html>

@@ -22,3 +22,9 @@ Run with manage.py::
     python manage.py collectstatic
     python manage.py createsuperuser
     python manage.py runserver
+
+
+clean migrations
+---
+    find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+    find . -path "*/migrations/*.pyc" -delete
