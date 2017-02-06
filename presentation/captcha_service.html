@@ -14,6 +14,7 @@
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
 
+
 		<!-- Printing and PDF exports -->
 		<script>
 			var link = document.createElement( 'link' );
@@ -53,26 +54,26 @@
 
 				<section>
 					<h5>Captcha Integration in Webservice</h5>
-					<pre><code class="hljs" data-trim contenteditable>
-						function linkify( selector ) {
-						  if( supports3DTransforms ) {
-						    var nodes = document.querySelectorAll( selector );
-
-						    for( var i = 0, len = nodes.length; i &lt; len; i++ ) {
-						      var node = nodes[i];
-
-						      if( !node.className ) {
-						        node.className += ' roll';
-						      }
-						    }
-						  }
-						}
+					<pre><code class="html hljs">
+    &lt;head&gt;
+        ...
+        &lt;link rel="stylesheet" type="text/css" href="captcha.min.css" /&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        ...
+        &lt;form class="captcha-form" action="" method=”post”&gt;
+            ...
+            &lt;button class="captcha-button" /&gt;
+        &lt;/form&gt;
+        ...
+        &lt;script type="text/javascript" src="captcha.min.js"&gt;&lt;/script&gt;
+    &lt;/body&gt;
 					</code></pre>
 				</section>
 
 				<section>
 					<h5>Communication with Captcha-Service</h5>
-					<img src="images/Kommunikation.png" width="100%">
+					<img src="images/Kommunikation.jpg" width="70%" style="margin: 0">
 				</section>
 
 				<section>
