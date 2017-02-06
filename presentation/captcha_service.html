@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>HPI Captcha Service</title>
+
+		<link rel="shortcut icon" href="images/favicon-unlock-alt.ico">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/white.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Captcha Service</h1>
+					<p>
+						<small>Marvin Gorecki, Alexander Kromer, Hendrik Rätz, Robert Stark</small>
+					</p>
+				</section>
+
+				<section>
+					<h3>Motivation</h3>
+					<p>Data Labeling for researchers and scientists!</p>
+				</section>
+
+				<section>
+					<h3>Captcha Architecture</h3>
+					<p>Easy integration of new captchas and tasks</p>
+					<img src="images/Captcha_architektur.png" width="100%">
+				</section>
+
+				<section>
+					<h3>
+						<a href="http://127.0.0.1:8000/accounts/login/" data-preview-link>Log In</a>
+					</h3>
+				</section>
+
+				<section>
+					<h3>Captcha Integration in Webservice</h3>
+					<pre><code class="hljs" data-trim contenteditable>
+						function linkify( selector ) {
+						  if( supports3DTransforms ) {
+						    var nodes = document.querySelectorAll( selector );
+
+						    for( var i = 0, len = nodes.length; i &lt; len; i++ ) {
+						      var node = nodes[i];
+
+						      if( !node.className ) {
+						        node.className += ' roll';
+						      }
+						    }
+						  }
+						}
+					</code></pre>
+				</section>
+
+				<section>
+					<h3>Communication with Captcha-Service</h3>
+					<img src="images/Kommunikation.png" width="100%">
+				</section>
+
+				<section>
+					<h3>
+						<a href="http://captcha-service.appspot.com/" data-preview-link>Captcha Demo</a>
+					</h3>
+				</section>
+
+				<section>
+					<h3>Solving algorithm</h3>
+					<table>
+						<thead>
+							<tr>
+								<th></th>
+								<th>Text-Captcha</th>
+								<th>Image-Captcha</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>solved</td>
+								<td>3 identical sol.</td>
+								<td>3 identical sol.</td>
+							</tr>
+							<tr>
+								<td>unsolvable</td>
+								<td>6 unique sol.</td>
+								<td>6 unique sol.</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+
+				<section>
+					<h3>
+						<a href="http://127.0.0.1:8000/download/" data-preview-link>Log In</a>
+					</h3>
+				</section>
+
+				<section>
+					<h3>Outlook</h3>
+					<p>more Captchas, e.g. splitting one image into smaller fragments</p>
+					<p>improve filter for downloads and analysis</p>
+				</section>
+
+				<section>
+					<h3>Questions?</h3>
+				</section>
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				history: true,
+
+				transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+				// More info https://github.com/hakimel/reveal.js#dependencies
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
