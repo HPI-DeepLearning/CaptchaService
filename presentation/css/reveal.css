@@ -1363,3 +1363,7 @@ body {
 
 .zoomed .reveal .roll span:after {
   visibility: hidden; }
+
+.reveal code {
+    font-size: 80%;
+}
