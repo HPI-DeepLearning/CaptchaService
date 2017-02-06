@@ -61,10 +61,8 @@
 			</div>
 			<div class="col s7 m8 l9">
 				<div class="input-field">
-				    <select id="taskselect">
-			      		<option value="" disabled selected>Choose your task</option>
-		      			<option value="brontosaurus">brontosaurus</option>
-			      			<option value="Platypus">Platypus</option>
+				    <select id="task" name="task">
+			      		<option value="" disabled selected>No tasks</option>
 				    </select>
 				    <label>Image Task</label>
 			  	</div>
@@ -93,6 +91,66 @@
 			<button id="addtaskbtn" class="modal-action modal-close waves-effect waves-green btn-flat">Add new task</button>
 		</div>
 	</div>
+
+
+	<script src="{{ STATIC_URL }}jquery-2.1.1.min.js"></script>
+	<script>
+		var URL = 'http://localhost:8000/captcha/getTask';
+		var taskReq = new XMLHttpRequest();
+		var response = "";
+		taskReq.open('GET', URL, true);
+		taskReq.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+		taskReq.responseType = 'json';
+		taskReq.onload = function (e) {
+			if(taskReq.status === 200) {
+				var xhr = e.target;
+				if (xhr.responseType === 'json') {
+					response = xhr.response;
+				} else {
+					response = JSON.parse(xhr.responseText); // IE bug fix
+				}
+				var $selectDropdown = 
+					$("#task")
+						// .empty()
+						.html(' ');
+
+				for (var i=0; i < response.task_list.length; i++) {
+					var value = response.task_list[i];
+					$selectDropdown.append(
+						$("<option></option>")
+						.attr("value",value)
+						.text(value)
+					);
+				}
+				$('select').material_select();
+			} else {
+				throw new Error('An error occurred during your request: ' +  taskReq.status + ' ' + taskReq.statusText);
+			}
+		};
+		taskReq.send();
+	</script>
+
+	<script>
+		$(document).ready(function () {
+			$('input[name=captchatype]').on('change', function(e) {
+			    if ($('input[name=captchatype]:checked').val() == "imagecaptcha") {
+			        document.getElementById("imagetask").style.display="block";
+			    } else {
+			        document.getElementById("imagetask").style.display="none";
+			    }
+			});
+			$("#addtaskbtn").click(function() {
+			    var taskname = $("#taskname").val();
+			    $("#task").append(
+			        $("<option></option>")
+			            .attr("value",taskname)
+			            .text(taskname)
+			    );
+			    $('select').material_select();
+			});
+		});
+	</script>
+
 {% else %}
 	<div class="center">
 		<h4>Please log in or register.</h4>

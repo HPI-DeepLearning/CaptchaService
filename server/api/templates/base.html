@@ -55,24 +55,5 @@
         $('select').material_select();
     });
 </script>
-<script>
-    $('input[name=captchatype]').on('change', function(e) {
-        if ($('input[name=captchatype]:checked').val() == "imagecaptcha") {
-            document.getElementById("imagetask").style.display="block";
-        } else {
-            document.getElementById("imagetask").style.display="none";
-        }
-    });
 
-    $("#addtaskbtn").click(function() {
-        var taskname = $("#taskname").val();
-        $("#taskselect").append(
-            $("<option></option>")
-                .attr("value",taskname)
-                .text(taskname)
-        );
-        $('select').material_select();
-    });
-
-</script>
 </html>
