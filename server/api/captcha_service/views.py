@@ -70,6 +70,7 @@ def upload(request):
     listing_txt = os.listdir(temp_directory)
     txtfile = ''
     for file in listing_txt:
+	print(file)
 	if file.endswith(".txt"):
 	    txtfile = file
     if (solved == True):
@@ -82,29 +83,45 @@ def upload(request):
 	    if file.endswith(".txt"):
 		continue	
 	    if (captchatype == 'imagecaptcha'):
-#		im = open(path + file, 'rb')
-#		image_data = im.read()
 		token = ImageCaptchaToken()
 	        token.create(file, image_data, 0, task)
 	    elif (captchatype == 'textcaptcha'):
 		file_path = path + file
-#		image_data = image_distortion.processImage(file_path)
+		image_data = image_distortion.processImage(file_path)
+		image_data.save(file)
+
+		im = open(file, 'rb')
+		image_data = im.read()
+
 		token = TextCaptchaToken()
 	        token.create(file, image_data, 0)
+		
+		os.remove(file)
 	    token.save()
 	    im.close()
     elif (solved == "solved"):
 	for file_name, solution in _yield_captcha_solutions(temp_directory, txtfile):
 	    im = open(path + file_name, 'rb')
 	    image_data = im.read()
-	    im.close()
+	    if file_name.endswith(".txt"):
+		continue	
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-		token.create(file_name, image_data, 1, task, solution) #solution=='1' evaluates to bool True
+		token.create(file_name, image_data, 1, task, solution) 
 	    elif (captchatype == 'textcaptcha'):
+		file_path = path + file_name
+		image_data = image_distortion.processImage(file_path)
+		image_data.save(file_name)
+
+		im = open(file_name, 'rb')
+		image_data = im.read()
+
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
+
+		os.remove(file_name)
 	    token.save()
+	    im.close()
 
 
     call_command('collectstatic', verbosity=0, interactive=False)
