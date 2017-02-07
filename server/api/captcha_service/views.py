@@ -83,8 +83,6 @@ def upload(request):
 	    if file.endswith(".txt"):
 		continue	
 	    if (captchatype == 'imagecaptcha'):
-#		im = open(path + file, 'rb')
-#		image_data = im.read()
 		token = ImageCaptchaToken()
 	        token.create(file, image_data, 0, task)
 	    elif (captchatype == 'textcaptcha'):
@@ -105,14 +103,25 @@ def upload(request):
 	for file_name, solution in _yield_captcha_solutions(temp_directory, txtfile):
 	    im = open(path + file_name, 'rb')
 	    image_data = im.read()
-	    im.close()
+	    if file_name.endswith(".txt"):
+		continue	
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
 		token.create(file_name, image_data, 1, task, solution=='1') #solution=='1' evaluates to bool True
 	    elif (captchatype == 'textcaptcha'):
+		file_path = path + file_name
+		image_data = image_distortion.processImage(file_path)
+		image_data.save(file_name)
+
+		im = open(file_name, 'rb')
+		image_data = im.read()
+
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
+
+		os.remove(file_name)
 	    token.save()
+	    im.close()
 
 
     call_command('collectstatic', verbosity=0, interactive=False)
@@ -186,8 +195,8 @@ def _yield_captcha_solutions(path, txtfile):
         for line in f:
     	    [file_name, solution] = line.split(';')
 	    solution = solution.strip()
-	    print file_name
-	    print solution
+#	    print file_name
+#	    print solution
 	    yield file_name, solution
 
 
