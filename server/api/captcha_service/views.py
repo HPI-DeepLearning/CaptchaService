@@ -100,7 +100,7 @@ def upload(request):
 	    im.close()
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-		token.create(file_name, image_data, 1, task, solution=='1') #solution=='1' evaluates to bool True
+		token.create(file_name, image_data, 1, task, solution) #solution=='1' evaluates to bool True
 	    elif (captchatype == 'textcaptcha'):
 		token = TextCaptchaToken()
 		token.create(file_name, image_data, 1, solution)
@@ -178,8 +178,6 @@ def _yield_captcha_solutions(path, txtfile):
         for line in f:
     	    [file_name, solution] = line.split(';')
 	    solution = solution.strip()
-	    print file_name
-	    print solution
 	    yield file_name, solution
 
 

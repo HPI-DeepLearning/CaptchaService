@@ -71,7 +71,10 @@ class ImageCaptchaToken(CaptchaToken):
     def create(self, file_name, file_data, resolved, task, result=False):
         super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
 	self.task = task
-        self.result = result
+	if result == 'True':
+            self.result = True 
+	else:
+	    self.result = False 
         self.captcha_type = "image"
 	return self
 
@@ -133,7 +136,6 @@ class TextCaptchaSession(CaptchaSession):
 
         self.order = randint(0,1)
 	first_url, second_url = self._adjust_captchas_to_order()
-
         #create JsonResponse for WebApplication
         response = JsonResponse({'first_url': first_url,
                              'second_url': second_url,
@@ -143,6 +145,7 @@ class TextCaptchaSession(CaptchaSession):
 
     def validate(self, params):
         result = params.get('result', None).strip()
+	
         try:
             first_result, second_result = result.split(' ')
 	except:
@@ -167,7 +170,6 @@ class TextCaptchaSession(CaptchaSession):
 
         else:
            valid = False
-
 	return JsonResponse({'valid': valid})
 
 # 	for debugging purpose
@@ -190,15 +192,15 @@ class TextCaptchaSession(CaptchaSession):
     @staticmethod
     def _get_random_captcha_pair():
         # get unsolved captcha_token
-        text_tokens = TextCaptchaToken.objects.all().filter(resolved=True, insolvable =False)
-	count = text_tokens.count()
-	unsolved_captcha_index = randint(0, count-1)
-        unsolved = text_tokens[unsolved_captcha_index]
+        text_tokens_unsolved = TextCaptchaToken.objects.all().filter(resolved=False)
+	count_unsolved = text_tokens_unsolved.count()
+	unsolved_captcha_index = randint(0, count_unsolved-1)
+        unsolved = text_tokens_unsolved[unsolved_captcha_index]
 	# get solved captcha_token
-        text_tokens = TextCaptchaToken.objects.all().filter(resolved=False)
-	count = text_tokens.count()
-	solved_captcha_index = randint(0, count-1)
-        solved = text_tokens[solved_captcha_index]
+        text_tokens_solved = TextCaptchaToken.objects.all().filter(resolved=True)
+	count_solved = text_tokens_solved.count()
+	solved_captcha_index = randint(0, count_solved-1)
+        solved = text_tokens_solved[solved_captcha_index]
         return solved, unsolved
 
     def _adjust_captchas_to_order(self):
@@ -240,31 +242,27 @@ class ImageCaptchaSession(CaptchaSession):
     def validate(self, params):
 	# get result to be bool array 
 	result_string = params.get('result', None)
+	if self._any_parameter_unset(self.session_key, result_string):
+	    return Response(status=status.HTTP_400_BAD_REQUEST)
+
 	result = result_string.split(",")
 	for index, element in enumerate(result):
 	    if element == '1':
 		result[index] = True
 	    else: 
 		result[index] = False
-		image_token_list_rebuild = []
-
+	
 	number_of_elements_per_token = 3 
 	self.image_token_list = self.rebuild_image_token_list(number_of_elements_per_token)
 	
-	if self._any_parameter_unset(self.session_key, result):
-	    return Response(status=status.HTTP_400_BAD_REQUEST)
-	
+	solution_list = self.create_solution_list()	
+
 	# validation
 
-	for token in self.image_token_list:
-	    if (token[number_of_elements_per_token-1] == 'True'):
-		token[number_of_elements_per_token-1] = True
-	    else: 
-		token[number_of_elements_per_token-1] = False
-	
 	valid = True
+	
 	for index, element in enumerate(self.order):
-	    if(element == '1' and result[index] != self.image_token_list[index][number_of_elements_per_token-1]):
+	    if(element == '1' and result[index] != solution_list[index]):
 		valid = False
 	
 	# proposals 
@@ -348,3 +346,11 @@ class ImageCaptchaSession(CaptchaSession):
 		auxlist = []
 		i = 0
 	return rebuild_image_token_list
+
+    def create_solution_list(self):
+	# results are not stored in image_token_list, so its necessary to get them from db
+	solution_list = []
+	for token in self.image_token_list:
+	    solution_list.append(ImageCaptchaToken.objects.get(pk=token[0]).result)
+	return solution_list
+
