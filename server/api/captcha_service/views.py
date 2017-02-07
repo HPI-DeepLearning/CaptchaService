@@ -70,6 +70,7 @@ def upload(request):
     listing_txt = os.listdir(temp_directory)
     txtfile = ''
     for file in listing_txt:
+	print(file)
 	if file.endswith(".txt"):
 	    txtfile = file
     if (solved == True):
@@ -88,9 +89,16 @@ def upload(request):
 	        token.create(file, image_data, 0, task)
 	    elif (captchatype == 'textcaptcha'):
 		file_path = path + file
-#		image_data = image_distortion.processImage(file_path)
+		image_data = image_distortion.processImage(file_path)
+		image_data.save(file)
+
+		im = open(file, 'rb')
+		image_data = im.read()
+
 		token = TextCaptchaToken()
 	        token.create(file, image_data, 0)
+		
+		os.remove(file)
 	    token.save()
 	    im.close()
     elif (solved == "solved"):
