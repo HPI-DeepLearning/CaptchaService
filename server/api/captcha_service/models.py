@@ -304,6 +304,9 @@ class ImageCaptchaSession(CaptchaSession):
 		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
 	    else:
 		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=False).filter(task=self.task)
+	    # if there are no unsolved tokens use solved tokens	
+	    if not image_tokens:
+		    image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
   	    count = image_tokens.count()
 	    current_token_index = randint(0,count-1)
 	    current_token = image_tokens[current_token_index]

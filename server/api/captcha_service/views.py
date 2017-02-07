@@ -174,8 +174,6 @@ def _retrieve_corresponding_session(session_key, request):
     return session
 
 def _yield_captcha_solutions(path, txtfile):
-    print txtfile
-    print path + txtfile
     with open(path + txtfile, 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
