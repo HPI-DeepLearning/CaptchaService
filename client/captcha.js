@@ -130,6 +130,9 @@ var captchaSolved = false, /* if set to true form gets submitted on form button 
         } else {
             var captchaCard = document.querySelectorAll('.captcha-card')[0];
             captchaCard.classList.add('shake');
+            // load new captcha tokens on wrong input to prevent brute force
+            var reloadButton = document.querySelectorAll('.captcha-actions #refresh')[0];
+            reloadButton.click();
             setTimeout(function(){captchaCard.classList.remove('shake')}, 1000);
         }
     },
