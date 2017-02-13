@@ -2,7 +2,7 @@
 A captcha service that helps researchers label their datasets
 
 
-# Integrate into Web application
+## Integrate into Web application
 
 In order to integrate the captcha service into your Web application it is essential to satisfy the following requirements:
 - It is essential to integrate `captcha.min.js` and `captcha.min.css` into your delivered html file (you can customize the css file to match your design)
