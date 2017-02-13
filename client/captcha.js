@@ -41,7 +41,7 @@ var captchaSolved = false, /* if set to true form gets submitted on form button 
                     '<a href="#" id="refresh"><svg viewBox="0 0 6 6" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:1.41421;"><path id="refresh" d="M5.666,3.48c0,0.007 0,0.019 -0.003,0.026c-0.319,1.328 -1.414,2.254 -2.798,2.254c-0.731,0 -1.44,-0.289 -1.972,-0.795l-0.484,0.484c-0.045,0.045 -0.105,0.071 -0.169,0.071c-0.131,0 -0.24,-0.109 -0.24,-0.24l0,-1.68c0,-0.131 0.109,-0.24 0.24,-0.24l1.68,0c0.131,0 0.24,0.109 0.24,0.24c0,0.064 -0.026,0.124 -0.071,0.169l-0.514,0.514c0.352,0.33 0.821,0.517 1.305,0.517c0.667,0 1.286,-0.345 1.635,-0.915c0.09,-0.146 0.135,-0.289 0.199,-0.439c0.018,-0.052 0.056,-0.086 0.112,-0.086l0.72,0c0.068,0 0.12,0.056 0.12,0.12l0,0Zm0.094,-3l0,1.68c0,0.131 -0.108,0.24 -0.24,0.24l-1.68,0c-0.131,0 -0.24,-0.109 -0.24,-0.24c0,-0.064 0.026,-0.124 0.072,-0.169l0.517,-0.517c-0.356,-0.33 -0.825,-0.514 -1.309,-0.514c-0.667,0 -1.286,0.345 -1.635,0.915c-0.09,0.146 -0.135,0.289 -0.199,0.439c-0.018,0.052 -0.056,0.086 -0.112,0.086l-0.746,0c-0.068,0 -0.12,-0.056 -0.12,-0.12l0,-0.026c0.322,-1.331 1.428,-2.254 2.812,-2.254c0.735,0 1.452,0.293 1.984,0.795l0.488,-0.484c0.044,-0.045 0.105,-0.071 0.168,-0.071c0.132,0 0.24,0.109 0.24,0.24l0,0Z" style="fill:#bebebe;fill-rule:nonzero;"/></svg></a>' +
                 '</div></div></div>'
     },
-    insertSessionKey = function(key) {
+    insertSessionKey = function(key) { // insert hidden input field containing the captcha session id
         var inputElementString = '<input id="session_key" type="hidden" name="captcha-key" value="' + key + '" />',
             form = document.querySelectorAll('.captcha-form')[0],
             div = document.createElement('div');
@@ -49,18 +49,18 @@ var captchaSolved = false, /* if set to true form gets submitted on form button 
         var input = div.firstChild;
         form.appendChild(input);
     },
-    insertTask = function(task) {
+    insertTask = function(task) { // insert image captcha task dynamically
         var text = document.querySelectorAll(".captcha-content .task")[0];
         text.innerHTML = 'Select all images below that match ' + task + ':';
     },
-    insertCaptchaData = {
-        text: function (response) {
+    insertCaptchaData = { // depending on the captcha type captcha tokens get embedded
+        text: function (response) { // into overlayed captcha html elements
             var firstImage = document.querySelectorAll('.first-captcha > img')[0],
                 secondImage = document.querySelectorAll('.second-captcha > img')[0];
             if (!firstImage || !secondImage) {
                 throw new Error('missing text captcha markup!');
             }
-            if (response.session_key){
+            if (response.session_key){ // do not do this on reload, since session id does not change on reload
                 insertSessionKey(response.session_key);
             }
             firstImage.setAttribute('src', baseURL + response.first_url);
@@ -95,7 +95,7 @@ var captchaSolved = false, /* if set to true form gets submitted on form button 
             checkboxes.forEach(function(el) {
                 el.checked = false;
             });
-            if (response.session_key){
+            if (response.session_key){ // do not do this on reload, since session id does not change on reload
                 insertSessionKey(response.session_key);
             }
             insertTask(response.task);
@@ -121,7 +121,9 @@ var captchaSolved = false, /* if set to true form gets submitted on form button 
         }
     },
     feedbackUserOnWrongInput = function(message) {
-        //TODO
+        var captchaCard = document.querySelectorAll('.captcha-card')[0];
+        captchaCard.classList.add('shake');
+        setTimeout(function(){captchaCard.classList.remove('shake')}, 1000);
     },
     reactOnValidationResponse = function(response) {
         if(response.valid) {
@@ -136,7 +138,7 @@ var captchaSolved = false, /* if set to true form gets submitted on form button 
             setTimeout(function(){captchaCard.classList.remove('shake')}, 1000);
         }
     },
-    obtainResult = {
+    obtainResult = { // retrieve user input
         text: function() {
             var result = document.querySelectorAll(".captcha-input > input")[0].value;
             if (result) {
@@ -171,10 +173,10 @@ captchaReq.onload = function (e) {
         var xhr = e.target;
         if (xhr.responseType === 'json') {
             response = xhr.response;
-            handleResponse(response);
         } else {
             response = JSON.parse(xhr.responseText); // IE bug fix
         }
+        handleResponse(response);
     } else {
       throw new Error('An error occurred during your request: ' +  captchaReq.status + ' ' + captchaReq.statusText);
     }
@@ -213,19 +215,13 @@ var handleResponse = function (response) {
     }
 
     /* 4. Add eventlistener on form button to summon overlay */
-
-    var showCaptchaOverlay = function () {
-        var body = document.querySelectorAll('body');
-
-    }
     button.addEventListener('click', function(e) {
-        if(!captchaSolved) {
+        if(!captchaSolved) { // when captcha is not solved yet summon captcha overlay
             e.preventDefault();
             // show captcha overlay
             captchaOverlay.classList.add('show');
             setTimeout(function(){captchaOverlay.classList.add('fadeIn');}, 10);
-        } else{
-    }
+        }
     })
 
     /* 5. Add eventlistener refresh button */
@@ -244,19 +240,18 @@ var handleResponse = function (response) {
                 var xhr = e.target;
                 if (xhr.responseType === 'json') {
                     response = xhr.response;
-                    insertCaptchaData[type](response);
                 } else {
                     response = JSON.parse(xhr.responseText); // IE bug fix
-                    insertCaptchaData[type](response);
                 }
+                insertCaptchaData[type](response);
             } else {
               throw new Error('An error occurred during your request: ' +  captchaReq.status + ' ' + captchaReq.statusText);
             }
         };
-        captchaReq.send('session_key=' + sessionKey);
+        captchaReq.send('session_key=' + sessionKey); // refresh session
     });
 
-    // 5. Click on overlay should hide captcha card
+    /* 6. Click on overlay should hide captcha card */
     var captchaOverlay = document.getElementsByClassName('overlay')[0];
     captchaOverlay.addEventListener('click', function(e){
         captchaOverlay.classList.remove('fadeIn');
@@ -264,11 +259,10 @@ var handleResponse = function (response) {
     });
     var captchaCard = document.getElementsByClassName('captcha-card')[0];
     captchaCard.addEventListener('click', function(e){
-        e.stopPropagation();
+        e.stopPropagation(); // don't click overlay when clicking on captcha card
     });
 
-    // 6. POST Form on validation and secrect key generated by Web Service
-
+    /* 7. POST Form on validation and secrect key generated by Web Service */
     var submit = document.getElementById('submit');
     submit.addEventListener('click', function(e){
         var sessionKey = document.querySelectorAll('#session_key')[0].getAttribute('value'),
@@ -285,11 +279,11 @@ var handleResponse = function (response) {
                 var xhr = e.target;
                 if (xhr.responseType === 'json') {
                     response = xhr.response;
-                    reactOnValidationResponse(response);
                 } else {
                     response = JSON.parse(xhr.responseText); // IE bug fix
-                    reactOnValidationResponse(response);
                 }
+                reactOnValidationResponse(response);
+
             } else {
               throw new Error('An error occurred during your request: ' +  captchaReq.status + ' ' + captchaReq.statusText);
             }
