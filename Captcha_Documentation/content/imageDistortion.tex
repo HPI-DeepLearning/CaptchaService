@@ -1,0 +1,8 @@
+\section{Image Distortion}
+\label{sec:image_distortion}
+
+The fact that images for text captchas are provided by users makes it impossible to tell if those images are easy to recognize for bots and are therefore safe to be used as captcha token. In order to complicate the recognition of the captcha token the systems uses an image distrotion algorithm which is automatically applied to all uploaded text captcha tokens.\\
+The image distortion algorithm consists of two steps: the drawing of a horizontal line and a wave transformation. \\
+In the first step it places a horizontal line in the middle of the image which is colored with the dominant color of the whole picture. Afterwards this line will be transformed together with the rest of the image.\\
+The frequency as well as the amplitude of the wave which will be applied to text are dependent to the height of the image. Furthermore the frequency depends on the width of the image so that one wavelength is at least as wide as the image itself. In addition to this both, the frquency and the amplitude, are modified by a random value in order make every transformation unique. \\
+Everything that is shifted out of bounds will be cut off. Additionally the pixels which were located at the bottom and the top of the the original picture will be stretched out vertically to fill the space which was emptied due to the transformation.\\
