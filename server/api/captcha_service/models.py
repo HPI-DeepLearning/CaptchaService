@@ -72,9 +72,9 @@ class ImageCaptchaToken(CaptchaToken):
         super(ImageCaptchaToken, self).create(file_name, file_data, resolved)
 	self.task = task
 	if result == 'True':
-            self.result = True 
+            self.result = True
 	else:
-	    self.result = False 
+	    self.result = False
         self.captcha_type = "image"
 	return self
 
@@ -145,7 +145,7 @@ class TextCaptchaSession(CaptchaSession):
 
     def validate(self, params):
         result = params.get('result', None).strip()
-	
+
         try:
             first_result, second_result = result.split(' ')
 	except:
@@ -236,11 +236,11 @@ class ImageCaptchaSession(CaptchaSession):
 				 'task' : self.task,
 				 'session_key': self.session_key,
 	                     	 'type': 'image'})
-	
+
 	return self, response
 
     def validate(self, params):
-	# get result to be bool array 
+	# get result to be bool array
 	result_string = params.get('result', None)
 	if self._any_parameter_unset(self.session_key, result_string):
 	    return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -249,23 +249,23 @@ class ImageCaptchaSession(CaptchaSession):
 	for index, element in enumerate(result):
 	    if element == '1':
 		result[index] = True
-	    else: 
+	    else:
 		result[index] = False
-	
-	number_of_elements_per_token = 3 
+
+	number_of_elements_per_token = 3
 	self.image_token_list = self.rebuild_image_token_list(number_of_elements_per_token)
-	
-	solution_list = self.create_solution_list()	
+
+	solution_list = self.create_solution_list()
 
 	# validation
 
 	valid = True
-	
+
 	for index, element in enumerate(self.order):
 	    if(element == '1' and result[index] != solution_list[index]):
 		valid = False
-	
-	# proposals 
+
+	# proposals
 	if (valid == True):
 	    for index, element in enumerate(self.order):
 		if (element == '0'):
@@ -302,10 +302,10 @@ class ImageCaptchaSession(CaptchaSession):
 		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
 	    else:
 		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=False).filter(task=self.task)
-	    # if there are no unsolved tokens use solved tokens	
+	    # if there are no unsolved tokens use solved tokens
 	    if not image_tokens:
-		    image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
-  	    count = image_tokens.count()
+		image_tokens = ImageCaptchaToken.objects.all().filter(resolved=True).filter(task=self.task)
+	    count = image_tokens.count()
 	    current_token_index = randint(0,count-1)
 	    current_token = image_tokens[current_token_index]
 	    token_list.append(current_token)
@@ -339,9 +339,9 @@ class ImageCaptchaSession(CaptchaSession):
 	auxlist = []
 	i = 0
 	for element in self.image_token_list:
-	   auxlist.append(element.strip())
-	   i += 1
-	   if (i == number_of_elements_per_token):
+	    auxlist.append(element.strip())
+	    i += 1
+	    if (i == number_of_elements_per_token):
 		rebuild_image_token_list.append(auxlist)
 		auxlist = []
 		i = 0
