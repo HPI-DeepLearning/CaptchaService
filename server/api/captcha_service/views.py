@@ -17,6 +17,7 @@ import image_distortion
 
 @api_view(['GET'])
 def request(request):
+    # called when a new session is requested
     remote_ip = get_ip(request)
     sessions = [ImageCaptchaSession, TextCaptchaSession]
     session = choice(sessions)() # random choice
@@ -28,6 +29,7 @@ def request(request):
 
 @api_view(['POST'])
 def validate(request):
+    # called when the solution for a session shall be validated
     params = request.POST
     session_key = params.get('session_key', None)
     session = _retrieve_corresponding_session(session_key, request)
@@ -37,6 +39,7 @@ def validate(request):
 
 @api_view(['POST'])
 def renew(request):
+    # called clients requests new tokens for a session
     params = request.POST
     session_key = params.get('session_key', None)
     if _any_parameter_unset(session_key):
@@ -48,6 +51,7 @@ def renew(request):
 #images for text captcha tokens get automatically distorted after upload
 @api_view(['POST'])
 def upload(request):
+    # called when files are uploaded to the captcha service
     params = request.POST
     captchatype = params.get('captchatype', None)
 
@@ -56,6 +60,7 @@ def upload(request):
     captchafile = request.FILES
     data_folder = captchafile.get('files', None)
     folder_name = data_folder.name.split(".")[0]
+    # uploaded zipfile is stored in temp_directory while beeing processed
     temp_directory = 'tempupload/'
 
     # delete leftovers in case something went wrong
@@ -70,6 +75,7 @@ def upload(request):
     listing = os.listdir(path)
     listing_txt = os.listdir(temp_directory)
     txtfile = ''
+    # check if txt-file with solutions was submitted
     for file in listing_txt:
 	print(file)
 	if file.endswith(".txt"):
@@ -78,6 +84,7 @@ def upload(request):
 	if txtfile == '':
 	    raise IOError('No solution file found')
     if (solved == "unsolved"):
+	# create tokens for unsolved images
 	for file in listing:
 	    im = open(path + file, 'rb')
 	    image_data = im.read()
@@ -103,6 +110,7 @@ def upload(request):
 	    token.save()
 	    im.close()
     elif (solved == "solved"):
+	# create tokens for solved images
 	for file_name, solution in _yield_captcha_solutions(temp_directory, txtfile):
 	    im = open(path + file_name, 'rb')
 	    image_data = im.read()
@@ -128,13 +136,14 @@ def upload(request):
 	    token.save()
 	    im.close()
 
-
+    # call collectstatic to add files to static folder
     call_command('collectstatic', verbosity=0, interactive=False)
     shutil.rmtree('tempupload')
     return HttpResponseRedirect('/')
 
 @api_view(['GET'])
 def download(request):
+    # called when downloading images via web interface
     params=request.GET
     captchatype = params.get('captchatype', None)
     textsolution = params.get('textsolution', None)
@@ -142,7 +151,6 @@ def download(request):
 	resolved = False
     else:
 	resolved = True
-    # TODO test if task is working 
     if (captchatype == 'imagecaptcha'): 
 	requested_task = params.get('task', None)
     file_path = 'static/captchas/'
@@ -176,6 +184,7 @@ def download(request):
 
 @api_view(['GET'])
 def getTask(request):
+    # called by web interface to provide list of existing tasks for ImageCaptcha
     task_query_set = ImageCaptchaToken.objects.order_by().values('task').distinct()
     task_list = []
     for task in task_query_set:
@@ -183,6 +192,7 @@ def getTask(request):
     return JsonResponse({'task_list' : task_list})
  
 def _retrieve_corresponding_session(session_key, request):
+    # retrives a session, that matches the session_key
     try:
         session = CaptchaSession.objects.get(pk=session_key)
     except:
@@ -196,6 +206,7 @@ def _retrieve_corresponding_session(session_key, request):
     return session
 
 def _yield_captcha_solutions(path, txtfile):
+    # reads solutions for tokens provided in txtfile
     with open(path + txtfile, 'r') as f:
         for line in f:
     	    [file_name, solution] = line.split(';')
@@ -210,7 +221,9 @@ def _any_parameter_unset(*keys):
         return False
 
 def _create_zipfile(file_path, file_name_list, resolved, storage_path):
+    # creates a zipfile and fills it with tokens requested for download
     zipf = zipfile.ZipFile(storage_path+'captchas.zip', 'w', zipfile.ZIP_DEFLATED)
+    # created zipfile is stored in storage_path, while beeing processed
     storage_path = 'tempdownload/'
     solutiontxt_name = 'CaptchaSolutions.txt'
     

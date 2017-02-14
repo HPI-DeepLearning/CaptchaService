@@ -17,6 +17,8 @@ from datetime import datetime
 from datetime import timedelta 
 
 class CaptchaToken(PolymorphicModel):
+    # Superclass for tokens 
+
     file = models.ImageField(upload_to='static/captchas/')
     # counter object that counts user proposals
     # to this captcha. If captcha is solved None is saved.
@@ -51,6 +53,7 @@ class TextCaptchaToken(CaptchaToken):
     #solves token if 3 matching proposals were made 
     #marks token as unsolveable if more than 6 resolutions didn't result in solved token
     def try_solve(self):
+	# checks if there is a solution for a token based on saved proposals
 	proposals = self.proposals
 	most_common = proposals.most_common()
 	num_proposoals = sum(proposals.values())
@@ -100,11 +103,13 @@ class ImageCaptchaToken(CaptchaToken):
 		self.save()
 
 class CaptchaSession(PolymorphicModel):
+    # superclass for sessions
+
     session_key = models.CharField(primary_key=True, unique=True, max_length=256)
 
     origin = models.CharField(max_length=128) # ip address
 
-    session_type = models.CharField(max_length=128)
+    session_type = models.CharField(max_length=128) 
 
     session_length = models.DurationField()
     expiration_date = models.DateTimeField()
@@ -112,6 +117,7 @@ class CaptchaSession(PolymorphicModel):
     is_valid = models.BooleanField()
 
     def create(self, remote_ip, session_type):
+	# basic configuration for captcha sessions
 	self.session_key = uuid.uuid4()
 	self.origin = remote_ip
 	self.session_type = session_type
@@ -122,7 +128,6 @@ class CaptchaSession(PolymorphicModel):
 	self.is_valid = False
 
     def _any_parameter_unset(*keys):
-
 	for key in keys:
             if not key:
                 return True
@@ -167,6 +172,7 @@ class TextCaptchaSession(CaptchaSession):
         self.order = randint(0,1)
 	first_url, second_url = self._adjust_captchas_to_order()
         #create JsonResponse for WebApplication
+
         response = JsonResponse({'first_url': first_url,
                              'second_url': second_url,
                              'session_key': self.session_key,
@@ -174,6 +180,7 @@ class TextCaptchaSession(CaptchaSession):
 	return self, response
 
     def validate(self, params):
+	# checks if client solution for captcha is correct
         result = params.get('result', None).strip()
 
         try:
@@ -197,21 +204,22 @@ class TextCaptchaSession(CaptchaSession):
 
 	    self.delete()
 
-
         else:
            valid = False
-	   self.renew()
-	return JsonResponse({'valid': valid})
-
-# 	for debugging purpose
-#	return JsonResponse({'solved_result': self.solved_captcha.result,
-#				 'unsolved_result_2': self.unsolved_captcha.result,
-#				 'given_result_1': first_result,
-#				 'given_result_2': second_result,
-#				 'valid': valid})
+	
+	# choose new tokens if valid is false to prevent brute force
+	if (valid == False):
+	    self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
+	    first_url, second_url = self._adjust_captchas_to_order()
+	    self.save(force_update=True)
+	
+	return JsonResponse({'valid': valid,
+			    'first_url' : first_url,
+			    'second_url' : second_url})
 
 
     def renew(self):
+	# provides new tokens for a session
         self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
 	first_url, second_url = self._adjust_captchas_to_order()
 	self.save(force_update=True)
@@ -250,13 +258,14 @@ class ImageCaptchaSession(CaptchaSession):
 
     #list with stored captcha_token
     image_token_list = SeparatedValuesField()
+    #The task is a category of pictures and it should be tested if the tokens of the session belong to it
     task = models.TextField(null=True)
 
     def create(self, remote_ip):
 	super(ImageCaptchaSession, self).create(remote_ip, 'imagesession')
 
 	self.order = self.create_order()
-	self.task = self.get_task()
+	self.task = self.choose_task()
 
 	self.image_token_list = self.get_image_token_list()
 	url_list = []
@@ -271,7 +280,12 @@ class ImageCaptchaSession(CaptchaSession):
 	return self, response
 
     def validate(self, params):
-	# get result to be bool array
+	 # checks if client solution for captcha is correct
+
+	# number of elements that are saved for each token in the image_token_list
+	number_of_elements_per_token = 3
+
+	# transorm result string to bool array
 	result_string = params.get('result', None)
 	if self._any_parameter_unset(self.session_key, result_string):
 	    return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -283,13 +297,12 @@ class ImageCaptchaSession(CaptchaSession):
 	    else:
 		result[index] = False
 
-	number_of_elements_per_token = 3
+
 	self.image_token_list = self.rebuild_image_token_list(number_of_elements_per_token)
 
 	solution_list = self.create_solution_list()
 
 	# validation
-
 	valid = True
 
 	for index, element in enumerate(self.order):
@@ -304,13 +317,26 @@ class ImageCaptchaSession(CaptchaSession):
 		    current_token = CaptchaToken.objects.get(pk=current_token_pk)
 		    current_token.add_proposal(result[index])
 		    current_token.try_solve()
+	
+	# choose new tokens if valid is false to prevent brute force
+	if (valid == False):
+	    self.order = self.create_order()
+	    self.task = self.choose_task()
+	    self.image_token_list = self.get_image_token_list()
+	    url_list = []
+	    for i in range(len(self.image_token_list)):
+	        url_list.append(self.image_token_list[i].file.url)
 
-	return JsonResponse({'valid' : valid})
+	    self.save(force_update=True)
+	    
+	return JsonResponse({'valid' : valid,
+			     'url_list' : url_list})
 
 
     def renew(self):
+	# provides new tokens for a session
 	self.order = self.create_order()
-	self.task = self.get_task()
+	self.task = self.choose_task()
 	self.image_token_list = self.get_image_token_list()
 	url_list = []
 	for i in range(len(self.image_token_list)):
@@ -355,7 +381,7 @@ class ImageCaptchaSession(CaptchaSession):
 	return order_list
 
     @staticmethod
-    def get_task():
+    def choose_task():
 	aux = ImageCaptchaToken.objects.all()
 	count = aux.count()
 	index = randint(0,count-1)
