@@ -13,6 +13,8 @@ import uuid
 from polymorphic.models import PolymorphicModel
 import json
 from .fields import SeparatedValuesField
+from datetime import datetime
+from datetime import timedelta 
 
 class CaptchaToken(PolymorphicModel):
     file = models.ImageField(upload_to='static/captchas/')
@@ -104,10 +106,20 @@ class CaptchaSession(PolymorphicModel):
 
     session_type = models.CharField(max_length=128)
 
+    session_length = models.DurationField()
+    expiration_date = models.DateTimeField()
+
+    is_valid = models.BooleanField()
+
     def create(self, remote_ip, session_type):
 	self.session_key = uuid.uuid4()
 	self.origin = remote_ip
 	self.session_type = session_type
+
+	self.session_length = timedelta(minutes=30)
+	self.expiration_date = datetime.now() + session_length
+
+	self.is_valid = False
 
     def _any_parameter_unset(*keys):
 
@@ -116,6 +128,20 @@ class CaptchaSession(PolymorphicModel):
                 return True
         return False
 
+    def expand_session(self):
+	self.expiration_date = datetime.now() + self.session_length
+
+    def is_expired(self):
+	return datetime.now() > self.expiration_date
+
+    #this method is used to ensure that a user has successfully solved the session (and it is still active)
+    def is_valid(self):
+	return self.is_valid and not self.is_expired()
+
+    #for debugging purposes
+    def __str__(self):
+	time_until_expiration = self.expiration_date - datetime.now() 
+	return self.session_key + ", " + self.expiration_date.isoformat() + ", " + time_until_expiration + ", " + str(self.is_valid)
 
 class TextCaptchaSession(CaptchaSession):
 
