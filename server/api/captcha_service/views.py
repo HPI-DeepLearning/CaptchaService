@@ -44,7 +44,8 @@ def renew(request):
     session = _retrieve_corresponding_session(session_key, request)
     return session.renew()
 
-
+#extracts images from uploaded zip file and creates needed tokens
+#images for text captcha tokens get automatically distorted after upload
 @api_view(['POST'])
 def upload(request):
     params = request.POST
@@ -88,9 +89,11 @@ def upload(request):
 	    elif (captchatype == 'textcaptcha'):
 		file_path = path + file
 		image_data = image_distortion.processImage(file_path)
-		image_data.save(file)
 
+		#workaround to use the image distortion algorithm more easily
+		image_data.save(file)
 		im = open(file, 'rb')
+
 		image_data = im.read()
 
 		token = TextCaptchaToken()
@@ -111,9 +114,11 @@ def upload(request):
 	    elif (captchatype == 'textcaptcha'):
 		file_path = path + file_name
 		image_data = image_distortion.processImage(file_path)
-		image_data.save(file_name)
 
+		#workaround to use the image distortion algorithm more easily
+		image_data.save(file_name)
 		im = open(file_name, 'rb')
+
 		image_data = im.read()
 
 		token = TextCaptchaToken()
