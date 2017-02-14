@@ -21,6 +21,7 @@ class CaptchaToken(PolymorphicModel):
     proposals = PickledObjectField()
     resolved = models.BooleanField(default=False)
     captcha_type = models.CharField(max_length=128)
+    insolvable = models.BooleanField(default=False)
 
     def create(self, file_name, file_data, resolved):
         self.file.save(file_name, ContentFile(file_data))
@@ -38,7 +39,6 @@ class TextCaptchaToken(CaptchaToken):
     """docstring for TextCaptcha."""
 
     result = EncryptedCharField(max_length=256)
-    insolvable = models.BooleanField(default=False)
 
     def create(self, file_name, file_data, resolved, result='', insolvable=False):
         super(TextCaptchaToken, self).create(file_name, file_data, resolved)
@@ -170,6 +170,7 @@ class TextCaptchaSession(CaptchaSession):
 
         else:
            valid = False
+	   self.renew()
 	return JsonResponse({'valid': valid})
 
 # 	for debugging purpose

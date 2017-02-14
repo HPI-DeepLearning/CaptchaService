@@ -1,25 +1,124 @@
 \section{Architecture / Distortion}
 \label{sec:architecture}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+The architecture is mainly represented in the models.py data. It is designed for simple expandability and uses inheritance to simplify the introduction of new captcha types.  An overview is given in the class diageramm in figure \ref{fig:classdia}. 
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1.5\linewidth]{content/figures/classdiagramm.png}
+\caption{Class diagramm representing the classes used for the generation of captchas. TODO text, update
+}
+\label{fig:classdia}
+\end{figure}
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+It consists of two main classes, the \emph{CaptchaToken} and \emph{CaptchaSession}. The class \emph{CaptchaToken} represents a single image, that is part for a captcha, e.g. a single word, that needs to be written down by the user in order to solve the captcha. The class \emph{CaptchaSession} represents a complete captcha challenge a user has to solve, e.g. writting down the words shown on all images. Each type of captcha challenge provided by the service is represented by a subclass of \emph{CaptchaSession} and \emph{CaptchaToken}. Currently two kinds of Captchas, ImageCaptchas and TextCaptchas are supported.
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+All that needs to be done for implementing a new type of captcha challenge is to create a new subclass for \emph{CaptchaToken} and \emph{CaptchaSession} and implement specific functionality in these subclasses. Which methods and attributes need to be added in the new subclasses is listed in the ``Attributes and Methods implemented in the subclass''-paragraph.
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+All instances of a \emph{CaptchaToken} or \emph{CaptchaSession} are saved in the \verb|db.sqlite3|-Database. 
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+\subsection{CaptchaToken}
+TODO konsistenz kuze beschr u einleitung
+The class \emph{CaptchaToken} represents a single image, that is part for a captcha, e.g. a single word, that needs to be written down by the user in order to solve the captcha.
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+\paragraph{Attributes and Methods implemented in the superclass} \mbox{} \\
 
-Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.
+Attributes:
+
+\begin{itemize}
+\item \verb|file|: Image, that is represented by the CaptchaToken.
+\item \verb|captcha_type|: String, that defines the type of captcha the token can be used for. Currently ``text'' for Textcaptchas and ``image'' for Imagecaptchas are supported.
+\item \verb|resolved|: Boolean, that indicates, if the solution for a \emph{CaptchaToken} is known or not. A \verb|0| means the token is unsolved and a \verb|1| means the Token is solved.
+\item \verb|proposals|: Dicitionary, that stores the possible solutions suggested by users of the captcha service and how often each solution was suggested.
+\item \verb|insolvable|: Boolean that indicates, that a token is not solvable by clients of the captcha service.
+\end{itemize}
+
+Methods:
+
+\begin{itemize}
+\item \verb|create( file_name, file_data, resolved)|: Responsible for basic configuration, that need to be done for all kinds of tokens, when they are created. Only used for supercalls in the \verb|create()|-method of subclasses.
+\item \verb|add_proposals(proposal)|: Adds a new suggested solution to the \verb|proposals|-dictionary, or increments the counter for an allready suggested proposal.
+\end{itemize}
+
+\paragraph{Attributes and Methods implemented in the subclass}  \mbox{} \\
+
+
+
+Attributes: 
+
+
+\begin{itemize}
+\item \verb|result|: Saves the correct solution for a token. Datatype differs between different subclasses, e.g. \emph{TextCaptchaToken} saves a string and \emph{ImageCaptchaToken} saves a boolean.
+\end{itemize}
+
+
+Methods:
+
+
+\begin{itemize}
+\item \verb|create(file_name, file_data, resolved, result, insolvable=False)|: Resposible for configurating all attributes of the \emph{CaptchaToken}. Returns a \emph{CaptchaToken}.
+\item \verb|try_solve|: Responsible for finding the correct solution for a \emph{CaptchaToken} based on the values saved in the \verb|proposals|-attribute.
+\end{itemize}
+
+
+\subsection{CaptchaSession}
+TODO konsistenz kuze beschr u einleitung
+Represents an instance of a captcha challange, that needs to be solved by a certain client. A \emph{CaptchaSessio}n consists of multiple ImageTokens, that are chosen randomly in order to create different challanges dynamically. Each Sessions corresponds to one of the supported types of \emph{CaptchaTokens}.
+
+
+\paragraph{Attributes and Methods implemented in the superclass} \mbox{} \\
+
+
+Attributes:
+
+\begin{itemize}
+\item \verb|session_key|: String, that serves as primary key to identify each session. 
+\item \verb|origin|: String, that holds the IP adress that requested the captcha challenge. It is used match requests made by the client to the corresponding session.
+\item \verb|session_type|: String, that defines the kind of captcha challenge, the client has to solve. Currently ``text'' for Textcaptchas and ``image'' for Imagecaptchas are supported.
+\end{itemize}
+
+
+Methods:
+
+\begin{itemize} 
+\item \verb|create(remote_ip, session_type)|: Responsible for basic creation of a \emph{CaptchaSession} of the requested type for the given IP adress. Only used for supercalls in the \verb|create()|-method of subclasses.
+\end{itemize}
+
+
+\paragraph{Attributes and Methods implemented in the subclass} \mbox{} \\
+
+
+Attributes:
+
+
+Each session needs to store the tokens, that were used for creating the session and additional information, that is needed for validating the answer given by the client. This can differ for every captchatype. 
+
+TextCaptchaSession:
+
+\begin{itemize} 
+\item \verb|solved_captcha_token|: \emph{TextCaptchaToken}, that is allready solved and is used as a control word for the session.
+\item \verb|unsolved_captcha_token|: \emph{TextCaptchaToken}, that is not solved and shall be solved by the client.
+\item \verb|order|: Boolean indicating the order, in which the two tokens are displayed to the client.(0 -> solved unsolved 1 -> unsolved solved) It is needed to map the answers given by the client to the right tokens.
+\end{itemize}
+
+
+ImageCaptchaSession:
+
+\begin{itemize}
+\item \verb|image_token_list|: List of \emph{ImageCaptchaTokens}, where all tokens used for the session are saved.
+\item \verb|order|: List of Booleans, that indicates which token in the \verb|image_token_list| is solved. (0 -> unsolved, 1-> solved)
+\item \verb|task|: String, taht saves the task for the \emph{ImageCaptchaSession}, e.g. which objects should be detected in the images.
+\end{itemize}
+
+Methods: 
+
+\begin{itemize}
+\item \verb|create(remote_ip)|: Responsible for creating a \emph{CaptchaSession} and returning the created session to the corresponding \verb|view|.
+\item \verb|validate(parameters)|: Responsible for validating the solution for a CaptchaSession and returning the created session to the corresponding \verb|view|. The solution suggested by the client is included in the parameters. Returns whether the session is valid or not.
+\item \verb|renew()|: Responsible for exchanging the \emph{CaptchaTokens} of a \emph{CaptchaSession}, to create a new challenge or the same session.
+\end{itemize}
+
 
 \clearpage
