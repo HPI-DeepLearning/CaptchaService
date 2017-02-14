@@ -23,7 +23,7 @@ class CaptchaToken(PolymorphicModel):
     proposals = PickledObjectField()
     resolved = models.BooleanField(default=False)
     captcha_type = models.CharField(max_length=128)
-    insolvable = models.BooleanField(default=False)
+    unsolvable = models.BooleanField(default=False)
 
     def create(self, file_name, file_data, resolved):
         self.file.save(file_name, ContentFile(file_data))
@@ -42,12 +42,14 @@ class TextCaptchaToken(CaptchaToken):
 
     result = EncryptedCharField(max_length=256)
 
-    def create(self, file_name, file_data, resolved, result='', insolvable=False):
+    def create(self, file_name, file_data, resolved, result='', unsolvable=False):
         super(TextCaptchaToken, self).create(file_name, file_data, resolved)
         self.result = result
         self.captcha_type = "text"
         return self
 
+    #solves token if 3 matching proposals were made 
+    #marks token as unsolveable if more than 6 resolutions didn't result in solved token
     def try_solve(self):
 	# checks if there is a solution for a token based on saved proposals
 	proposals = self.proposals
@@ -55,7 +57,7 @@ class TextCaptchaToken(CaptchaToken):
 	num_proposoals = sum(proposals.values())
 
 	if len(proposals.values()) >= 6: #more than six different proposals
-	    self.insolvable = True
+	    self.unsolvable = True
 	    self.resolved = True
 	    self.save()
 	elif num_proposoals >= 3:
@@ -81,13 +83,15 @@ class ImageCaptchaToken(CaptchaToken):
         self.captcha_type = "image"
 	return self
 
+    #solves token if 4 matching proposals were made 
+    #marks token as unsolveable if more than 6 resolutions didn't result in solved token
     def try_solve(self):
 	proposals = self.proposals
 	most_common = proposals.most_common()
 	num_proposoals = sum(proposals.values())
 
 	if num_proposoals >= 6:
-	    self.insolvable = True
+	    self.unsolvable = True
 	    self.resolved = True
 	    self.save()
 	elif num_proposoals >= 4:
