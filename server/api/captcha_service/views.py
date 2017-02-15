@@ -89,7 +89,7 @@ def upload(request):
 	    im = open(path + file, 'rb')
 	    image_data = im.read()
 	    if file.endswith(".txt"):
-		continue	
+		continue
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
 	        token.create(file, image_data, 0, task)
@@ -105,7 +105,7 @@ def upload(request):
 
 		token = TextCaptchaToken()
 	        token.create(file, image_data, 0)
-		
+
 		os.remove(file)
 	    token.save()
 	    im.close()
@@ -115,10 +115,10 @@ def upload(request):
 	    im = open(path + file_name, 'rb')
 	    image_data = im.read()
 	    if file_name.endswith(".txt"):
-		continue	
+		continue
 	    if (captchatype == 'imagecaptcha'):
 		token = ImageCaptchaToken()
-		token.create(file_name, image_data, 1, task, solution) 
+		token.create(file_name, image_data, 1, task, solution)
 	    elif (captchatype == 'textcaptcha'):
 		file_path = path + file_name
 		image_data = image_distortion.processImage(file_path)
@@ -151,14 +151,14 @@ def download(request):
 	resolved = False
     else:
 	resolved = True
-    if (captchatype == 'imagecaptcha'): 
+    if (captchatype == 'imagecaptcha'):
 	requested_task = params.get('task', None)
     file_path = 'static/captchas/'
     storage_path = 'tempdownload/'
     if not (os.path.exists(storage_path)):
 	    os.makedirs(storage_path)
 
-  
+
     # create list of tokens, that need to be included in zipfile
     file_name_list = []
     if (resolved == False):
@@ -175,8 +175,8 @@ def download(request):
     for token in token_list:
 	file_name_list.append(token.file.name)
     _create_zipfile(file_path, file_name_list, resolved, storage_path)
-   
-    zipf = open(storage_path + 'captchas.zip') 
+
+    zipf = open(storage_path + 'captchas.zip')
     response = HttpResponse(zipf, content_type=storage_path+'captchas.zip')
     response['Content-Disposition'] = 'attachment; filename="%s"' % 'captchas.zip'
     shutil.rmtree('tempdownload')
@@ -190,7 +190,17 @@ def getTask(request):
     for task in task_query_set:
 	task_list.append(task["task"])
     return JsonResponse({'task_list' : task_list})
- 
+
+@api_view(['GET'])
+def validate_solved_session(request):
+    params = request.GET
+    session_key = params.get("session_key", None)
+    session = CaptchaSession.objects.get(pk=session_key)
+    if session:
+	return JsonResponse({'valid' : session.is_valid()})
+    else:
+	return JsonResponse({'valid' : False})
+
 def _retrieve_corresponding_session(session_key, request):
     # retrives a session, that matches the session_key
     try:
@@ -226,13 +236,13 @@ def _create_zipfile(file_path, file_name_list, resolved, storage_path):
     # created zipfile is stored in storage_path, while beeing processed
     storage_path = 'tempdownload/'
     solutiontxt_name = 'CaptchaSolutions.txt'
-    
+
     if (resolved == True):
 	solutiontxt_name = 'CaptchaSolutions.txt'
- 	solutiontxt = open(storage_path + solutiontxt_name, 'w')		
-    
+ 	solutiontxt = open(storage_path + solutiontxt_name, 'w')
+
     for element in file_name_list:
-	zipf.write(element, 'captchas/'+os.path.basename(file_path+element)) # second argument defines location of element 
+	zipf.write(element, 'captchas/'+os.path.basename(file_path+element)) # second argument defines location of element
 	# create txt with solutions for solved captchas
 	if (resolved == True):
 	    solution = CaptchaToken.objects.get(file=element).result
