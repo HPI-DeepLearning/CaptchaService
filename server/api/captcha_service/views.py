@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
 from django.http import JsonResponse
 from django.core.management import call_command
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -195,11 +196,12 @@ def getTask(request):
 def validate_solved_session(request):
     params = request.GET
     session_key = uuid.UUID(params.get("session_key", None))
-    session = CaptchaSession.objects.get(pk=session_key)
-    if session:
-	return JsonResponse({'valid' : session.is_valid()})
-    else:
+    try:
+	session = CaptchaSession.objects.get(pk=session_key)
+    except ObjectDoesNotExist:
 	return JsonResponse({'valid' : False})
+
+    return JsonResponse({'valid' : session.is_valid()})
 
 def _retrieve_corresponding_session(session_key, request):
     # retrives a session, that matches the session_key
