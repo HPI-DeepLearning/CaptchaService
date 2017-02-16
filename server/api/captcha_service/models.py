@@ -15,6 +15,7 @@ import json
 from .fields import SeparatedValuesField
 from datetime import datetime
 from datetime import timedelta 
+from django.utils import timezone
 
 class CaptchaToken(PolymorphicModel):
     # Superclass for tokens 
@@ -123,7 +124,7 @@ class CaptchaSession(PolymorphicModel):
 	self.session_type = session_type
 
 	self.session_length = timedelta(minutes=30)
-	self.expiration_date = datetime.now() + self.session_length
+	self.expiration_date = timezone.now() + self.session_length
 
 	self.is_solved = False
 
@@ -134,10 +135,10 @@ class CaptchaSession(PolymorphicModel):
         return False
 
     def expand_session(self):
-	self.expiration_date = datetime.now() + self.session_length
+	self.expiration_date = timezone.now() + self.session_length
 
     def is_expired(self):
-	return datetime.now() > self.expiration_date
+	return timezone.now() > self.expiration_date
 
     #this method is used to ensure that a user has successfully solved the session (and it is still active)
     def is_valid(self):
@@ -147,7 +148,7 @@ class CaptchaSession(PolymorphicModel):
     def __str__(self):
 	session_key = str(self.session_key)
 	expiration_date = self.expiration_date.isoformat()
-	time_until_expiration = str(self.expiration_date - datetime.now())
+	time_until_expiration = str(self.expiration_date - timezone.now())
 	is_solved = str(self.is_solved)
 	is_valid = str(self.is_valid())
 	return "session key: " + session_key + \
@@ -189,6 +190,7 @@ class TextCaptchaSession(CaptchaSession):
 
     def validate(self, params):
 	# checks if client solution for captcha is correct
+
         result = params.get('result', None).strip()
 
         try:
@@ -227,6 +229,8 @@ class TextCaptchaSession(CaptchaSession):
 
     def renew(self):
 	# provides new tokens for a session
+	self.expand_session()
+
         self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
 	first_url, second_url = self._adjust_captchas_to_order()
 	self.save(force_update=True)
@@ -343,6 +347,8 @@ class ImageCaptchaSession(CaptchaSession):
 
     def renew(self):
 	# provides new tokens for a session
+	self.expand_session()
+
 	self.order = self.create_order()
 	self.task = self.choose_task()
 	self.image_token_list = self.get_image_token_list()

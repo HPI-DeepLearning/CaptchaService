@@ -194,7 +194,7 @@ def getTask(request):
 @api_view(['GET'])
 def validate_solved_session(request):
     params = request.GET
-    session_key = params.get("session_key", None)
+    session_key = uuid.UUID(params.get("session_key", None))
     session = CaptchaSession.objects.get(pk=session_key)
     if session:
 	return JsonResponse({'valid' : session.is_valid()})
