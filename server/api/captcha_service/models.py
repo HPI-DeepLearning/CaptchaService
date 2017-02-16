@@ -15,6 +15,7 @@ import json
 from .fields import SeparatedValuesField
 from datetime import datetime
 from datetime import timedelta 
+from django.utils import timezone
 
 class CaptchaToken(PolymorphicModel):
     # Superclass for tokens 
@@ -114,7 +115,7 @@ class CaptchaSession(PolymorphicModel):
     session_length = models.DurationField()
     expiration_date = models.DateTimeField()
 
-    is_valid = models.BooleanField()
+    is_solved = models.BooleanField()
 
     def create(self, remote_ip, session_type):
 	# basic configuration for captcha sessions
@@ -123,9 +124,9 @@ class CaptchaSession(PolymorphicModel):
 	self.session_type = session_type
 
 	self.session_length = timedelta(minutes=30)
-	self.expiration_date = datetime.now() + session_length
+	self.expiration_date = timezone.now() + self.session_length
 
-	self.is_valid = False
+	self.is_solved = False
 
     def _any_parameter_unset(*keys):
 	for key in keys:
@@ -134,19 +135,27 @@ class CaptchaSession(PolymorphicModel):
         return False
 
     def expand_session(self):
-	self.expiration_date = datetime.now() + self.session_length
+	self.expiration_date = timezone.now() + self.session_length
 
     def is_expired(self):
-	return datetime.now() > self.expiration_date
+	return timezone.now() > self.expiration_date
 
     #this method is used to ensure that a user has successfully solved the session (and it is still active)
     def is_valid(self):
-	return self.is_valid and not self.is_expired()
+	return self.is_solved and not self.is_expired()
 
     #for debugging purposes
     def __str__(self):
-	time_until_expiration = self.expiration_date - datetime.now() 
-	return self.session_key + ", " + self.expiration_date.isoformat() + ", " + time_until_expiration + ", " + str(self.is_valid)
+	session_key = str(self.session_key)
+	expiration_date = self.expiration_date.isoformat()
+	time_until_expiration = str(self.expiration_date - timezone.now())
+	is_solved = str(self.is_solved)
+	is_valid = str(self.is_valid())
+	return "session key: " + session_key + \
+	    ", expiration date: " + expiration_date + \
+	    ", time until expiration: " + time_until_expiration + \
+	    ", is solved: " + is_solved + \
+	    ", is valid: " + is_valid 
 
 class TextCaptchaSession(CaptchaSession):
 
@@ -181,6 +190,7 @@ class TextCaptchaSession(CaptchaSession):
 
     def validate(self, params):
 	# checks if client solution for captcha is correct
+
         result = params.get('result', None).strip()
 
         try:
@@ -195,14 +205,13 @@ class TextCaptchaSession(CaptchaSession):
 	if self.order == 0 and self.solved_captcha.result.strip() == first_result.strip() or self.order == 1 and self.solved_captcha.result.strip() == second_result.strip():
 
 	    valid = True
+	    self.is_solved = True
 	    if self.order == 0:
 		self.unsolved_captcha.add_proposal(second_result.strip())
 	    else:
 		self.unsolved_captcha.add_proposal(first_result.strip())
 
 	    self.unsolved_captcha.try_solve()
-
-	    self.delete()
 
         else:
            valid = False
@@ -220,6 +229,8 @@ class TextCaptchaSession(CaptchaSession):
 
     def renew(self):
 	# provides new tokens for a session
+	self.expand_session()
+
         self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
 	first_url, second_url = self._adjust_captchas_to_order()
 	self.save(force_update=True)
@@ -311,6 +322,7 @@ class ImageCaptchaSession(CaptchaSession):
 
 	# proposals
 	if (valid == True):
+	    self.is_solved = True
 	    for index, element in enumerate(self.order):
 		if (element == '0'):
 		    current_token_pk = self.image_token_list[index][0]
@@ -335,6 +347,8 @@ class ImageCaptchaSession(CaptchaSession):
 
     def renew(self):
 	# provides new tokens for a session
+	self.expand_session()
+
 	self.order = self.create_order()
 	self.task = self.choose_task()
 	self.image_token_list = self.get_image_token_list()
