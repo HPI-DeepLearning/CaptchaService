@@ -189,7 +189,8 @@ class TextCaptchaSession(CaptchaSession):
 	
 	return JsonResponse({'valid': valid,
 			    'first_url' : first_url,
-			    'second_url' : second_url})
+			    'second_url' : second_url,
+			     'type': 'text'})
 
 
     def renew(self):
@@ -304,7 +305,9 @@ class ImageCaptchaSession(CaptchaSession):
 	    self.save(force_update=True)
 	    
 	return JsonResponse({'valid' : valid,
-			     'url_list' : url_list})
+			     'url_list' : url_list,
+			     'type': 'image',
+			     'task': self.task})
 
 
     def renew(self):
