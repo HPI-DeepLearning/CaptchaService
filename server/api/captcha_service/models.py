@@ -229,8 +229,10 @@ class TextCaptchaSession(CaptchaSession):
             self.solved_captcha, self.unsolved_captcha = self._get_random_captcha_pair()
             first_url, second_url = self._adjust_captchas_to_order()
             self.save(force_update=True)
+	else:
+	    first_url, second_url = self._adjust_captchas_to_order()
 
-        return JsonResponse({'valid': valid,
+	return JsonResponse({'valid': valid,
                              'first_url': first_url,
                              'second_url': second_url,
                              'type': 'text'})
@@ -261,6 +263,7 @@ class TextCaptchaSession(CaptchaSession):
         return solved, unsolved
 
     def _adjust_captchas_to_order(self):
+	# returns iamage urls for one solved and one unsolved CaptchaToken and returns them acoording to the order
         if self.order == 0:
             first_url = self.solved_captcha.file.url
             second_url = self.unsolved_captcha.file.url
@@ -288,10 +291,11 @@ class ImageCaptchaSession(CaptchaSession):
         self.task = self.choose_task()
 
         self.image_token_list = self.get_image_token_list()
+
+	# create list of image urls to send in response
         url_list = []
         for i in range(len(self.image_token_list)):
             url_list.append(self.image_token_list[i].file.url)
-
         response = JsonResponse({'url_list': url_list,
                                  'task': self.task,
                                  'session_key': self.session_key,
@@ -300,7 +304,7 @@ class ImageCaptchaSession(CaptchaSession):
         return self, response
 
     def validate(self, params):
-         # checks if client solution for captcha is correct
+        # checks if client solution for captcha is correct
 
         # number of elements that are saved for each token in the
         # image_token_list
@@ -340,18 +344,25 @@ class ImageCaptchaSession(CaptchaSession):
                         pk=current_token_pk)
                     current_token.add_proposal(result[index])
                     current_token.try_solve()
-
-        # choose new tokens if valid is false to prevent brute force
-        if (valid == False):
-            self.order = self.create_order()
-            self.task = self.choose_task()
-            self.image_token_list = self.get_image_token_list()
-            url_list = []
-            for i in range(len(self.image_token_list)):
-                url_list.append(self.image_token_list[i].file.url)
-
-            self.save(force_update=True)
-
+	
+	if (valid == False):
+           # choose new tokens if valid is false to prevent brute force
+           self.order = self.create_order()
+           self.task = self.choose_task()
+           self.image_token_list = self.get_image_token_list()
+	   url_list = []
+           for i in range(len(self.image_token_list)):
+               url_list.append(self.image_token_list[i].file.url)
+	else:
+	    # create list of recent image urls to send in response when valid is true
+	    url_list = []
+	    # get image urls by the token id saved in image_token_list
+            for index in range(len(self.image_token_list)):
+		current_token_pk = self.image_token_list[index][0]
+		current_token = ImageCaptchaToken.objects.get(pk=current_token_pk)
+		url = current_token.file.url
+        	url_list.append(url)
+	
         return JsonResponse({'valid': valid,
                              'url_list': url_list,
                              'type': 'image',
