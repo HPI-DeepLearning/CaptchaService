@@ -11,8 +11,8 @@ The models consist of two main classes, the \emph{CaptchaToken} and \emph{Captch
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=1.5\linewidth]{content/figures/classdiagramm.png}
-\caption{Class diagram representing the classes used for the generation of captchas. TODO text, update
+\includegraphics[width=1.1\linewidth]{content/figures/classdiagramm.png}
+\caption{Class diagram representing the classes used for the generation of captchas.TODO
 }
 \label{fig:classdia}
 \end{figure}
@@ -26,7 +26,7 @@ All instances of a \emph{CaptchaToken} or \emph{CaptchaSession} are saved in the
 
 \subsubsection{CaptchaToken}
 
-The class \emph{CaptchaToken} represents a single image, that is part for a captcha, e.g. a single word, that needs to be written down by the user in order to solve the captcha.
+The class \emph{CaptchaToken} represents a single image, that is part for a captcha, e.g. a single word, that needs to be written down by the user in order to solve the captcha. Multiple \emph{CaptchaTokens} are combined to a captcha challenge, when a new \emph{CaptchaSession} is created.
 
 \paragraph{Attributes and Methods implemented in the superclass} \mbox{} \\
 
@@ -37,7 +37,7 @@ Attributes:
 \item \verb|captcha_type|: String, that defines the type of captcha the token can be used for. Currently ``text'' for Textcaptchas and ``image'' for Imagecaptchas are supported.
 \item \verb|resolved|: Boolean, that indicates, if the solution for a \emph{CaptchaToken} is known or not. A \verb|0| means the token is unsolved and a \verb|1| means the Token is solved.
 \item \verb|proposals|: Dictionary, that stores the possible solutions suggested by users of the captcha service and how often each solution was suggested.
-\item \verb|insolvable|: Boolean that indicates, that a token is not solvable by clients of the captcha service.
+\item \verb|insolvable|: Boolean that indicates, that a token is not solvable by clients of the captcha service. This value is set to \verb|True|, if there are many proposals for a \emph{CaptchaToken} without one proposal having the majority of the votes. For more information see \hyperref[sec:solving_algorithm]{section 6 (solving algorithm)}.
 \end{itemize}
 
 Methods:
@@ -82,6 +82,9 @@ Attributes:
 \item \verb|session_key|: String, that serves as primary key to identify each session. 
 \item \verb|origin|: String, that holds the IP adress that requested the captcha challenge. It is used match requests made by the client to the corresponding session.
 \item \verb|session_type|: String, that defines the kind of captcha challenge, the client has to solve. Currently ``text'' for Textcaptchas and ``image'' for Imagecaptchas are supported.
+\item \verb|session_length|: Timedelta, that stores the amount of time, a session can be validated.
+\item \verb|expiration_date|: Datetime, that stores the date, after which a \emph{CaptchaSession} can not be validated anymore.
+\item \verb|is_solved|: Boolean, that stores, if a \emph{CaptchaSession} was allready solved by the client.
 \end{itemize}
 
 
@@ -89,6 +92,9 @@ Methods:
 
 \begin{itemize} 
 \item \verb|create(remote_ip, session_type)|: Responsible for basic creation of a \emph{CaptchaSession} of the requested type for the given IP-address. Only used for super-calls in the \verb|create()|-method of subclasses.
+\item \verb|expand_session()|: Responsible for changing the \verb|expiration_date| of a \emph{CaptchaSession} to a later date.
+\item \verb|is_expired()|: Responsible for checking, if a session is expired. Returns \verb|True| when the current date is before the \verb|expiration_date|.
+\item \verb|is_valid()|: Responsible for checking, if a \emph{CaptchaSession} can still be validated by the client. Returns \verb|True| if the session is not expired or allready solved.
 \end{itemize}
 
 
@@ -114,14 +120,14 @@ ImageCaptchaSession:
 \begin{itemize}
 \item \verb|image_token_list|: List of \emph{ImageCaptchaTokens}, where all tokens used for the session are saved.
 \item \verb|order|: List of Booleans, that indicates which token in the \verb|image_token_list| is solved. (0 -> unsolved, 1-> solved)
-\item \verb|task|: String, that saves the task for the \emph{ImageCaptchaSession}, e.g. which objects should be detected in the images.
+\item \verb|task|: String, that saves the object that should be detected in the captcha challenge, e.g. cat, if cats should be identified.
 \end{itemize}
 
 Methods: 
 
 \begin{itemize}
-\item \verb|create(remote_ip)|: Responsible for creating a \emph{CaptchaSession} and returning the created session to the corresponding \verb|view|, and a JsonResponse with the parameters needed to render the captcha challenge in the front end (e.g. urls of pictures that are shown in the challenge).
-\item \verb|validate(parameters)|: Responsible for validating the solution for a CaptchaSession and returning the created session to the corresponding \verb|view|. The solution suggested by the client is included in the parameters. If a solution is invalid, new \emph{CaptchaTokens} are chosen for the \emph{CaptchaSession} to prevent brute forcing. Returns a JsonResponse with information whether the session is valid or not and a list of image-URLs that shall be rendered in the session.
+\item \verb|create(remote_ip)|: Responsible for creating a \emph{CaptchaSession} and returning the created session to the corresponding \verb|view|, and a JsonResponse with the parameters needed to render the captcha challenge in the front end (e.g. urls of pictures that are shown in the challenge). Depending on the type of the \emph{CaptchaSession} the function chooses a mix of multiple \emph{CaptchaTokens} with some of them being unsolved and some of them beeing solved. The unsolved \emph{CaptchaTokens} shall be labeled and the solved \emph{CaptchaTokens} are used for checking if the answer is correct. 
+\item \verb|validate(parameters)|: Responsible for validating the solution for a CaptchaSession and returning the created session to the corresponding \verb|view|. The solution suggested by the client is included in the parameters. The method checks, if the suggested solutions matches the solution for the solved \emph{CaptchaTokens}. If the solution given by the client is correct, \verb|proposals| are added for the unsolved \emph{CaptchaTokens} and \verb|try_solve()| is called on these tokens. If the solution is false new \emph{CaptchaTokens} are chosen for the \emph{CaptchaSession} to prevent brute forcing. Returns a JsonResponse with information whether the session is valid or not and a list of image-URLs that shall be rendered in the session.
 \item \verb|renew()|: Responsible for exchanging the \emph{CaptchaTokens} of a \emph{CaptchaSession}, to create a new challenge or the same session. Returns a JsonResponse of the updated information needed to render the session in the front end.
 \end{itemize}
 

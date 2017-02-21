@@ -129,7 +129,7 @@ class CaptchaSession(PolymorphicModel):
         self.session_key = uuid.uuid4()
         self.origin = remote_ip
         self.session_type = session_type
-
+	print type(timezone.now())
         self.session_length = timedelta(minutes=30)
         self.expiration_date = timezone.now() + self.session_length
 
