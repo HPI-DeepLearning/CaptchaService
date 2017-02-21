@@ -12,7 +12,7 @@ The models consist of two main classes, the \emph{CaptchaToken} and \emph{Captch
 \begin{figure}[!h]
 \centering
 \includegraphics[width=1.1\linewidth]{content/figures/classdiagramm.png}
-\caption{Class diagram representing the classes used for the generation of captchas.TODO
+\caption{Class diagram representing the classes used for the generation of captchas. The two main classes \emph{CaptchaToken} and \emph{CaptchaSession} are shown in the center. All other classes inherit from one of the superclasses.
 }
 \label{fig:classdia}
 \end{figure}
@@ -26,7 +26,7 @@ All instances of a \emph{CaptchaToken} or \emph{CaptchaSession} are saved in the
 
 \subsubsection{CaptchaToken}
 
-The class \emph{CaptchaToken} represents a single image, that is part for a captcha, e.g. a single word, that needs to be written down by the user in order to solve the captcha. Multiple \emph{CaptchaTokens} are combined to a captcha challenge, when a new \emph{CaptchaSession} is created.
+The class \emph{CaptchaToken} are the basic units of the captcha service. Data, that shall be labeled by the captcha service is saved as an \emph{CaptchaToken}. Multiple \emph{CaptchaTokens} are combined to a captcha challenge, when a new \emph{CaptchaSession} is created.
 
 \paragraph{Attributes and Methods implemented in the superclass} \mbox{} \\
 
@@ -70,7 +70,7 @@ Methods:
 
 \subsubsection{CaptchaSession}
 
-Represents an instance of a captcha challenge, that needs to be solved by a certain client. A \emph{CaptchaSessio}n consists of multiple ImageTokens, that are chosen randomly in order to create different challanges dynamically. Each Sessions corresponds to one of the supported types of \emph{CaptchaTokens}.
+Represents an instance of a captcha challenge, that needs to be solved by a certain client. A \emph{CaptchaSessio}n consists of multiple \emph{CaptchaTokens}, that are chosen randomly in order to create different challanges dynamically. Each Sessions corresponds to one of the supported types of \emph{CaptchaTokens}. The tokens chosen are a mix of solved and unsolved tokens, in order to make it possible to validate the session and label new data.
 
 
 \paragraph{Attributes and Methods implemented in the superclass} \mbox{} \\
@@ -80,21 +80,21 @@ Attributes:
 
 \begin{itemize}
 \item \verb|session_key|: String, that serves as primary key to identify each session. 
-\item \verb|origin|: String, that holds the IP adress that requested the captcha challenge. It is used match requests made by the client to the corresponding session.
+\item \verb|origin|: String, that holds the IP address that requested the captcha challenge. It is used match requests made by the client to the corresponding session.
 \item \verb|session_type|: String, that defines the kind of captcha challenge, the client has to solve. Currently ``text'' for Textcaptchas and ``image'' for Imagecaptchas are supported.
 \item \verb|session_length|: Timedelta, that stores the amount of time, a session can be validated.
 \item \verb|expiration_date|: Datetime, that stores the date, after which a \emph{CaptchaSession} can not be validated anymore.
-\item \verb|is_solved|: Boolean, that stores, if a \emph{CaptchaSession} was allready solved by the client.
+\item \verb|is_solved|: Boolean, that stores, if a \emph{CaptchaSession} was already solved by the client.
 \end{itemize}
 
 
 Methods:
 
 \begin{itemize} 
-\item \verb|create(remote_ip, session_type)|: Responsible for basic creation of a \emph{CaptchaSession} of the requested type for the given IP-address. Only used for super-calls in the \verb|create()|-method of subclasses.
+\item \verb|create(remote_ip, session_type)|: Responsible for basic creation of a \emph{CaptchaSession} of the requested type for the given IP address. Only used for super-calls in the \verb|create()|-method of subclasses.
 \item \verb|expand_session()|: Responsible for changing the \verb|expiration_date| of a \emph{CaptchaSession} to a later date.
 \item \verb|is_expired()|: Responsible for checking, if a session is expired. Returns \verb|True| when the current date is before the \verb|expiration_date|.
-\item \verb|is_valid()|: Responsible for checking, if a \emph{CaptchaSession} can still be validated by the client. Returns \verb|True| if the session is not expired or allready solved.
+\item \verb|is_valid()|: Responsible for checking, if a \emph{CaptchaSession} was successfully validated by a client and is not expired. In that case \verb|True| is returned.
 \end{itemize}
 
 
@@ -126,7 +126,7 @@ ImageCaptchaSession:
 Methods: 
 
 \begin{itemize}
-\item \verb|create(remote_ip)|: Responsible for creating a \emph{CaptchaSession} and returning the created session to the corresponding \verb|view|, and a JsonResponse with the parameters needed to render the captcha challenge in the front end (e.g. urls of pictures that are shown in the challenge). Depending on the type of the \emph{CaptchaSession} the function chooses a mix of multiple \emph{CaptchaTokens} with some of them being unsolved and some of them beeing solved. The unsolved \emph{CaptchaTokens} shall be labeled and the solved \emph{CaptchaTokens} are used for checking if the answer is correct. 
+\item \verb|create(remote_ip)|: Responsible for creating a \emph{CaptchaSession} and returning the created session to the corresponding \verb|view|, and a JsonResponse with the parameters needed to render the captcha challenge in the front end (e.g. urls of pictures that are shown in the challenge). Depending on the type of the \emph{CaptchaSession} the function chooses a mix of multiple \emph{CaptchaTokens} with some of them being unsolved and some of them being solved. The unsolved \emph{CaptchaTokens} are data that shall be labeled and the solved \emph{CaptchaTokens} are used for checking, if the answer for the \emph{CaptchaSession} is correct. 
 \item \verb|validate(parameters)|: Responsible for validating the solution for a CaptchaSession and returning the created session to the corresponding \verb|view|. The solution suggested by the client is included in the parameters. The method checks, if the suggested solutions matches the solution for the solved \emph{CaptchaTokens}. If the solution given by the client is correct, \verb|proposals| are added for the unsolved \emph{CaptchaTokens} and \verb|try_solve()| is called on these tokens. If the solution is false new \emph{CaptchaTokens} are chosen for the \emph{CaptchaSession} to prevent brute forcing. Returns a JsonResponse with information whether the session is valid or not and a list of image-URLs that shall be rendered in the session.
 \item \verb|renew()|: Responsible for exchanging the \emph{CaptchaTokens} of a \emph{CaptchaSession}, to create a new challenge or the same session. Returns a JsonResponse of the updated information needed to render the session in the front end.
 \end{itemize}
@@ -139,14 +139,16 @@ The views handle POST- and GET-Requests made by the Client, third party web app 
 List of Requests handled by views:
 
 \begin{itemize}
-\item \verb|request|: GET-Request called by the client, when a new session is requested. Chooses a type for the session randomly, calls create-Method for the session implemented in \verb|models.py| and directs the response of session.create() to the client.
-\item \verb|validate|: POST-Request called by the client, when a solution for a captcha challenge is submitted. Retrieves the the corresponding \emph{CaptchaSession} from the database, calls the validate-Method of the session and directs the response to the client.
-\item \verb|renew|: POST-Request called by the client, when a new challenge for an existing \emph{CaptchaSession} shall be provided. Retrieves the the corresponding \emph{CaptchaSession} from the database, calls the renew-Method of the session and directs the response to the client.
-\item \verb|upload|: POST-Request called by the web interface, when new files are uploaded to the captcha service. Extracts the files from the zip-file and creates tokens corresponding to the provided data.
-\item \verb|download|: GET-Request called by the web interface, to retrieve tokens and solutions from the database. Collects \emph{CaptchaTokens}, that meet the requirements specified in the web interface, compresses them to a zip-file and returns the file.
-\item \verb|getTask|: GET-Request called by the web interface, to get all possible tasks for an \emph{ImageCaptchaSession}. Gets all tasks from the database and returns them as a list in a JsonResponse.
+\item \verb|request(request)|: GET-Request called by the client, when a new session is requested. Chooses a type for the session randomly, calls create-Method for the session implemented in \verb|models.py| and directs the response of session.create() to the client.
+\item \verb|validate(request)|: POST-Request called by the client, when a solution for a captcha challenge is submitted. Retrieves the the corresponding \emph{CaptchaSession} from the database, calls the validate-Method of the session and directs the response to the client.
+\item \verb|renew(request)|: POST-Request called by the client, when a new challenge for an existing \emph{CaptchaSession} shall be provided. Retrieves the the corresponding \emph{CaptchaSession} from the database, calls the renew-Method of the session and directs the response to the client.
+\item \verb|upload(request)|: POST-Request called by the web interface, when new files are uploaded to the captcha service. Extracts the files from the zip-file and creates tokens corresponding to the provided data.
+\item \verb|download(request)|: GET-Request called by the web interface, to retrieve tokens and solutions from the database. Collects \emph{CaptchaTokens}, that meet the requirements specified in the web interface, compresses them to a zip-file and returns the file.
+\item \verb|getTask(request)|: GET-Request called by the web interface, to get all possible tasks for an \emph{ImageCaptchaSession}. Gets all tasks from the database and returns them as a list in a JsonResponse.
+\item \verb|validate_solved_session(request)|: GET-Request called by the third party web application, to check is a \emph{CaptchaSession} was successfully validated by a client. This prevents clients from being able to bypass the captcha challenge.
 \end{itemize}
 
 
 \clearpage
+
 
