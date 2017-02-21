@@ -7,7 +7,7 @@ The System is designed for simple expandability and uses inheritance to simplify
 
 \subsection{Models (models.py)}
 
-The models consist of two main classes, the \emph{CaptchaToken} and \emph{CaptchaSession}. An overview is given in the class diagramm in figure \ref{fig:classdia}. 
+The models consist of two main classes, the \emph{CaptchaToken} and \emph{CaptchaSession}. An overview is given in the class diagram in figure \ref{fig:classdia}. 
 
 \begin{figure}[!h]
 \centering
@@ -17,7 +17,7 @@ The models consist of two main classes, the \emph{CaptchaToken} and \emph{Captch
 \label{fig:classdia}
 \end{figure}
 
-The class \emph{CaptchaToken} represents a single image, that is part for a captcha, e.g. a single word, that needs to be written down by the user in order to solve the captcha. The class \emph{CaptchaSession} represents a complete captcha challenge a user has to solve, e.g. writting down the words shown on all images. Each type of captcha challenge provided by the service is represented by a subclass of \emph{CaptchaSession} and \emph{CaptchaToken}. Currently two kinds of Captchas, ImageCaptchas and TextCaptchas, are supported. 
+The class \emph{CaptchaToken} represents a single image, that is part for a captcha, e.g. a single word, that needs to be written down by the user in order to solve the captcha. The class \emph{CaptchaSession} represents a complete captcha challenge a user has to solve, e.g. writing down the words shown on all images. Each type of captcha challenge provided by the service is represented by a subclass of \emph{CaptchaSession} and \emph{CaptchaToken}. Currently two kinds of Captchas, ImageCaptchas and TextCaptchas, are supported. 
 
 
 All that needs to be done for implementing a new type of captcha challenge is to create a new subclass for \emph{CaptchaToken} and \emph{CaptchaSession} and implement specific functionality in these subclasses. Which methods and attributes need to be added in the new subclasses is listed in the ``Attributes and Methods implemented in the subclass''-paragraph.
@@ -37,7 +37,7 @@ Attributes:
 \item \verb|captcha_type|: String, that defines the type of captcha the token can be used for. Currently ``text'' for Textcaptchas and ``image'' for Imagecaptchas are supported.
 \item \verb|resolved|: Boolean, that indicates, if the solution for a \emph{CaptchaToken} is known or not. A \verb|0| means the token is unsolved and a \verb|1| means the Token is solved.
 \item \verb|proposals|: Dictionary, that stores the possible solutions suggested by users of the captcha service and how often each solution was suggested.
-\item \verb|insolvable|: Boolean that indicates, that a token is not solvable by clients of the captcha service. This value is set to \verb|True|, if there are many proposals for a \emph{CaptchaToken} without one proposal having the majority of the votes. For more information see \hyperref[sec:solving_algorithm]{section 6 (solving algorithm)}.
+\item \verb|insolvable|: Boolean which indicates, that a token is not solvable by clients of the captcha service. This value is set to \verb|True|, if there are many proposals for a \emph{CaptchaToken} without one proposal having the majority of the votes. For more information see \hyperref[sec:solving_algorithm]{section 6 (solving algorithm)}.
 \end{itemize}
 
 Methods:
@@ -70,7 +70,7 @@ Methods:
 
 \subsubsection{CaptchaSession}
 
-Represents an instance of a captcha challenge, that needs to be solved by a certain client. A \emph{CaptchaSessio}n consists of multiple \emph{CaptchaTokens}, that are chosen randomly in order to create different challanges dynamically. Each Sessions corresponds to one of the supported types of \emph{CaptchaTokens}. The tokens chosen are a mix of solved and unsolved tokens, in order to make it possible to validate the session and label new data.
+Represents an instance of a captcha challenge, that needs to be solved by a certain client. A \emph{CaptchaSession} consists of multiple \emph{CaptchaTokens}, that are chosen randomly in order to create different challenges dynamically. Each Sessions corresponds to one of the supported types of \emph{CaptchaTokens}. The tokens chosen are a mix of solved and unsolved tokens, in order to make it possible to validate the session and label new data.
 
 
 \paragraph{Attributes and Methods implemented in the superclass} \mbox{} \\
@@ -92,7 +92,7 @@ Methods:
 
 \begin{itemize} 
 \item \verb|create(remote_ip, session_type)|: Responsible for basic creation of a \emph{CaptchaSession} of the requested type for the given IP address. Only used for super-calls in the \verb|create()|-method of subclasses.
-\item \verb|expand_session()|: Responsible for changing the \verb|expiration_date| of a \emph{CaptchaSession} to a later date.
+\item \verb|expand_session()|: Responsible for changing the \verb|expiration_date| of a \emph{CaptchaSession} so that the session is valid for another \verb|session_length|.
 \item \verb|is_expired()|: Responsible for checking, if a session is expired. Returns \verb|True| when the current date is before the \verb|expiration_date|.
 \item \verb|is_valid()|: Responsible for checking, if a \emph{CaptchaSession} was successfully validated by a client and is not expired. In that case \verb|True| is returned.
 \end{itemize}
@@ -104,14 +104,14 @@ Methods:
 Attributes:
 
 
-Each session needs to store the tokens, that were used for creating the session and additional information, that is needed for validating the answer given by the client. This can differ for every captchatype. 
+Each session needs to store the tokens, that were used for creating the session and additional information, that is needed for validating the answer given by the client. This can differ for every captcha type. 
 
 TextCaptchaSession:
 
 \begin{itemize} 
 \item \verb|solved_captcha_token|: \emph{TextCaptchaToken}, that is already solved and is used as a control word for the session.
-\item \verb|unsolved_captcha_token|: \emph{TextCaptchaToken}, that is not solved and shall be solved by the client.
-\item \verb|order|: Boolean indicating the order, in which the two tokens are displayed to the client.(0 -> solved unsolved 1 -> unsolved solved) It is needed to map the answers given by the client to the right tokens.
+\item \verb|unsolved_captcha_token|: \emph{TextCaptchaToken}, that is not solved and shall be identified by the client.
+\item \verb|order|: Boolean indicating the order, in which the two tokens are displayed to the client.(0 -> solved, unsolved 1 -> unsolved, solved) It is needed to map the answers given by the client to the right tokens.
 \end{itemize}
 
 
@@ -134,7 +134,7 @@ Methods:
 
 \subsection{Views (views.py)}
 
-The views handle POST- and GET-Requests made by the Client, third party web app and the web interface. 
+The views handle POST- and GET-Requests made by the Client, third party web application and the web interface. 
 
 List of Requests handled by views:
 
