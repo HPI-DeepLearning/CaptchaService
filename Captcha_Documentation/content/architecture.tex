@@ -131,6 +131,10 @@ Methods:
 \item \verb|renew()|: Responsible for exchanging the \emph{CaptchaTokens} of a \emph{CaptchaSession}, to create a new challenge or the same session. Returns a JsonResponse of the updated information needed to render the session in the front end.
 \end{itemize}
 
+\paragraph{Session length and expiration} \mbox{} \\
+
+A \emph{CaptchaSession} expires after a certain amount of time in order prevent replay attacks. For this reason \verb|is_valid()| always returns false after the expiration date is over. The \emph{CaptchaSession} however remains in the database indefintely, because Django does not provide an elegant method to automatically delete session after expiry. Therefore the CaptchaService provides a Django command, which is called \verb|delete_timeouted_sessions| and on execution removes all timed out \emph{CaptchaSessions} in the Database. This can be paired with a cron job so that timeouted sessions will be in short intervals. 
+
 
 \subsection{Views (views.py)}
 
