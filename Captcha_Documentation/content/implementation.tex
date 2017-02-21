@@ -4,7 +4,6 @@
 \subsection{Server Side}
 \label{subsec:Server Side}
 
-
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
 
 Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
@@ -17,10 +16,9 @@ Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique lu
 
 Integer vitae neque odio, a sollicitudin lorem. Aenean orci mauris, tristique luctus fermentum eu, feugiat vel massa. Fusce sem sem, egestas nec vulputate vel, pretium sit amet mi. Fusce ut nisl id risus facilisis euismod. Curabitur et elementum purus. Duis tincidunt fringilla eleifend. Morbi id lorem eu ante adipiscing feugiat. Sed congue erat in enim eleifend dignissim at in nisl. Donec tortor mauris, mollis vel pretium vitae, lacinia nec sapien. Donec erat neque, ullamcorper tincidunt iaculis sit amet, pharetra bibendum ipsum. Nunc mattis risus ac ante consequat nec pulvinar neque molestie. Etiam interdum nunc at metus lacinia non varius erat dignissim. Integer elementum, felis id facilisis vulputate, ipsum tellus venenatis dui, at blandit nibh massa in dolor. Cras a ultricies sapien. Vivamus adipiscing feugiat pharetra.
 
-
 \subsection{Client Side}
 \label{subsec:Client Side}
-The captcha service integrates seemlessly into existing web applications. It basically works by appending an invisible overlay to the body element of the existing website. The overlay fades in when the user clicks the submit button of the captcha protected form. Thereby it does not affect the layout of the existing websites.
+The captcha service integrates seamlessly into existing web applications. It basically works by appending an invisible overlay to the body element of the existing website. The overlay fades in when the user hits the submit button of the captcha protected form. Thereby it does not affect the layout of the existing websites.
 \begin{figure}[!h]
 	\centering
 	\includegraphics[width=0.7\linewidth]{content/figures/captcha_words.png}
@@ -37,19 +35,22 @@ The captcha service integrates seemlessly into existing web applications. It bas
 	\label{fig:captcha_images}
 \end{figure}
  
- As soon as the client visits the page, the browser opens a session at a captcha service via REST API. The browser receives a session key, the captcha type, a list of captcha tokens and - in case of an image captcha session - a task. The session key gets stored in a hidden input field in the captcha protected form. As a result the session key is posted to the web application as soon as the form is submitted in order to make sure that the client properly solved the captcha at a later point in time. 
+ As soon as the user visits the page, the browser opens a session at the captcha service via REST API. The browser receives a session key, the captcha type, a list of captcha tokens and - in case of an image captcha session - a task. The session key gets stored in a hidden input field in the captcha protected form. As a result the session key is sent to the web application as soon as the form is submitted in order to make sure that the client properly solved the captcha at a later point in time. 
  
- Using the captcha types the captcha tokens get either rendered as text captcha tokens, as shown in fig. \ref{fig:captcha_words}, or as image captcha grid, as depicted in fig.\ref{fig:captcha_images}. In case the session type is a image captcha session, the task is generated dynamically by inserting the delivered task into the HTML, unlike the text captcha task, which is static.
+ Using the captcha types the captcha tokens get either rendered as text captcha tokens, as shown in fig. \ref{fig:captcha_words}, or as image captcha grid, as depicted in fig.\ref{fig:captcha_images}. In case the session type is an image captcha session, the task is generated dynamically by inserting the delivered task into the HTML, unlike the text captcha task, which is static.
  
- When the client hits the reload button, the captcha service is asked via REST API to renew the session's captcha tokens. The response consists of a new list of tokens of the same type as before. Subsequently, the old captcha tokens are replaced by the freshly received captcha tokens. The submit action triggers the server-side solution validation via REST API. In case the solution was correct the form gets submitted including the session key. When the solution is incorrect, the captcha card shakes in order to visually indicate the wrong solution and newly assigned captcha tokens are inserted. This happens in order to prevent brute force solving. As soon as a wrong solution is submitted, the captcha service assigns new captcha tokens to the session and return them as response to the client. As a result, you can not restore the old session tokens and try to solve it by using all possible inputs.
+ When the client hits the reload button, the captcha service is asked via REST API to renew the session's captcha tokens. The response consists of a new list of tokens of the same type as before. Subsequently, the old captcha tokens are replaced by the freshly received captcha tokens. The submit action triggers the server-side solution validation via REST API. In case the solution was correct the form gets submitted including the session key. When the solution is incorrect, the captcha card shakes in order to visually indicate the wrong solution and all newly assigned captcha tokens are inserted. This happens in order to prevent brute force solving. As soon as a wrong solution is submitted, the captcha service assigns new captcha tokens to the session and return them as response to the client. As a result, you can not restore the old session tokens and try to solve it by using all possible inputs.
 
-
-\section{Captcha Integration}
-\label{sec:Captcha Integration}
+\subsection{Captcha Integration}
+\label{subsec:Captcha Integration}
 
 Integrating the captcha service into your existing web application is fairly easy. You have to take the following steps:
-- inject \texttt{captcha.min.css} and \texttt{captcha.min.js} to your HTML skeleton
-- Make sure the to be protected captcha form has the class \textit{captcha-form} and the corresponding submit button possesses the class \textit{captcha-button}
-- And finally, integrate an additional POST request to our captcha service including the clients session key into your existing server-side code, that receives the form data, in order to assure that the user solved the captcha correctly and did not modify the javascript code
+\begin{enumerate}
+	\item inject \texttt{captcha.min.css} and \texttt{captcha.min.js} to your HTML skeleton
+	\item  Make sure the to be protected captcha form has the class \textit{captcha-form} and the corresponding submit button possesses the class \textit{captcha-button}
+	\item Finally, integrate an additional POST request to our captcha service including the clients session key into your existing server-side code, that receives the form data, in order to assure that the user solved the captcha correctly and did not modify the javascript code
+\end{enumerate}
 
-\texttt{captcha.min.js} includes the client-side code, whose behaviour is described in the last section. \texttt{captcha.min.css} provides the initial styling. Feel free to modify it , such that it fits your design.lülüü
+\texttt{captcha.min.js} includes the client-side code, whose behaviour is described in the last section. \texttt{captcha.min.css} provides the initial styling. Feel free to modify it, such that it fits your design. 
+
+\clearpage
