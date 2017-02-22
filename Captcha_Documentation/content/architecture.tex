@@ -1,7 +1,7 @@
 \section{Architecture}
 \label{sec:architecture}
 
-The CaptchaService uses a Model-View-Controller to distinguish between data and its representation. The views are included in the \verb|views.py|-file and process requests made by the client, the third party web app and the web interface. 
+The Captcha service uses a Model-View-Controller to distinguish between data and its representation. The views are included in the \verb|views.py|-file and process requests made by the client, the third party web app and the web interface. 
 The data model is represented in the \verb|models.py|-file and manages \emph{CaptchaTokens}, \emph{CaptchaSessions} and the connection to the database.
 The System is designed for simple expandability and uses inheritance to simplify the introduction of new Captcha types. 
 
@@ -120,7 +120,7 @@ Methods:
 \clearpage
 \paragraph{Session length and expiration} \mbox{} \\
 
-A \emph{CaptchaSession} expires after a certain amount of time, in order to prevent replay attacks. For this reason \verb|is_valid()| always returns false after the expiration date is over. The \emph{CaptchaSession} however remains in the database indefintely, because Django does not provide an elegant method to automatically delete session after expiry. Therefore the CaptchaService provides a Django command, which is called \verb|delete_timeouted_sessions| and on execution removes all timed out \emph{CaptchaSessions} in the Database. This can be paired with a cron job so that timed out sessions will be deleted in short intervals. 
+A \emph{CaptchaSession} expires after a certain amount of time, in order to prevent replay attacks. For this reason \verb|is_valid()| always returns false after the expiration date is over. The \emph{CaptchaSession} however remains in the database indefintely, because Django does not provide an elegant method to automatically delete session after expiry. Therefore the Captcha service provides a Django command, which is called \verb|delete_timeouted_sessions| and on execution removes all timed out \emph{CaptchaSessions} in the Database. This can be paired with a cron job so that timed out sessions will be deleted in short intervals. 
 
 \clearpage
 \subsection{Views (views.py)}

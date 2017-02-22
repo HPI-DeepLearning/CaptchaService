@@ -23,6 +23,7 @@ urlpatterns = [
     url(r'^accounts/', include('registration.urls')),
     url(r'^captcha/', include('captcha_service.urls')),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^upload/complete', TemplateView.as_view(template_name='upload_complete.html'), name='upload_complete'),
     url(r'^upload/', TemplateView.as_view(template_name='upload.html'), name='upload'),
     url(r'^download/', TemplateView.as_view(template_name='download.html'),
         name='download'),
