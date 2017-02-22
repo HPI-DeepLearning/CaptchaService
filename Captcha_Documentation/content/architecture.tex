@@ -73,7 +73,7 @@ Attributes:
 \item \verb|session_key|: String, that serves as primary key to identify each session. 
 \item \verb|origin|: String, that holds the IP address that requested the Captcha challenge. It is used to match requests made by the client to the corresponding session.
 \item \verb|session_type|: String, that defines the kind of Captcha challenge, the client has to solve. Currently ``text'' for TextCaptchas and ``image'' for ImageCaptchas are supported.
-\item \verb|session_length|: Timedelta, that stores the amount of time in which a session can be validated.
+\item \verb|session_length|: Timedelta, that stores the amount of time in which a session can be validated. The default value is 30 minutes, which is initialised in the \verb|create()| method of \emph{CaptchaSession}.
 \item \verb|expiration_date|: Datetime, that stores the date, after which a \emph{CaptchaSession} can not be validated anymore.
 \item \verb|is_solved|: Boolean, that stores if a \emph{CaptchaSession} was already solved by the client.
 \end{itemize}
