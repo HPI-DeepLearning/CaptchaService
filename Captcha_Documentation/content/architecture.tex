@@ -120,7 +120,7 @@ Methods:
 \clearpage
 \paragraph{Session length and expiration} \mbox{} \\
 
-A \emph{CaptchaSession} expires after a certain amount of time, in order to prevent replay attacks. For this reason \verb|is_valid()| always returns false after the expiration date is over. The \emph{CaptchaSession} however remains in the database indefintely, because Django does not provide an elegant method to automatically delete session after expiry. Therefore the Captcha service provides a Django command, which is called \verb|delete_timeouted_sessions| and on execution removes all timed out \emph{CaptchaSessions} in the Database. This can be paired with a cron job so that timed out sessions will be deleted in short intervals. 
+A \emph{CaptchaSession} expires after a certain amount of time. The default time for the \verb|session_length| is 30 minutes. It can be changed in the \verb|create()|-method of the \emph{CaptchaSession} class. The expirations of sessions is done in order to prevent replay attacks. For this reason \verb|is_valid()| always returns false after the expiration date is over. The \emph{CaptchaSession} however remains in the database indefintely, because Django does not provide an elegant method to automatically delete session after expiry. Therefore the Captcha service provides a Django command, which is called \verb|delete_timeouted_sessions| and on execution removes all timed out \emph{CaptchaSessions} in the Database. This can be paired with a cron job so that timed out sessions will be deleted in short intervals. 
 
 \clearpage
 \subsection{Views (views.py)}
@@ -128,13 +128,20 @@ A \emph{CaptchaSession} expires after a certain amount of time, in order to prev
 The views handle POST- and GET-Requests made by the Client, third party web application and the web interface. List of Requests handled by views:
 
 \begin{itemize}
-\item \verb|request(request)|: GET-Request called by the client, when a new session is requested. Chooses a type for the session randomly, calls create-Method for the session implemented in \verb|models.py| and directs the response of session.create() to the client.
-\item \verb|validate(request)|: POST-Request called by the client, when a solution for a Captcha challenge is submitted. Retrieves the the corresponding \emph{CaptchaSession} from the database, calls the validate-Method of the session and directs the response to the client.
-\item \verb|renew(request)|: POST-Request called by the client, when a new challenge for an existing \emph{CaptchaSession} shall be provided. Retrieves the corresponding \emph{CaptchaSession} from the database, calls the renew-Method of the session and directs the response to the client.
-\item \verb|upload(request)|: POST-Request called by the web interface, when new files are uploaded to the Captcha service. Extracts the files from the zip-file and creates tokens corresponding to the provided data.
-\item \verb|download(request)|: GET-Request called by the web interface, to retrieve tokens and solutions from the database. Collects \emph{CaptchaTokens}, that meet the requirements specified in the web interface, compresses them to a zip-file and returns the file.
-\item \verb|getTask(request)|: GET-Request called by the web interface, to get all possible tasks for an \emph{ImageCaptchaSession}. Gets all tasks from the database and returns them as a list in a JsonResponse.
+\item \verb|request(request)|: GET-Request called by the client, when a new session is requested. Chooses a type for the session randomly, calls create-Method for the session implemented in \verb|models.py| and directs the response of session.create() to the client.\\
+Corresponding URL: hostname/captcha/request
+\item \verb|validate(request)|: POST-Request called by the client, when a solution for a Captcha challenge is submitted. Retrieves the the corresponding \emph{CaptchaSession} from the database, calls the validate-Method of the session and directs the response to the client. \\
+Corresponding URL: hostname/captcha/validate
+\item \verb|renew(request)|: POST-Request called by the client, when a new challenge for an existing \emph{CaptchaSession} shall be provided. Retrieves the corresponding \emph{CaptchaSession} from the database, calls the renew-Method of the session and directs the response to the client. \\
+Corresponding URL: hostname/captcha/renew
+\item \verb|upload(request)|: POST-Request called by the web interface, when new files are uploaded to the Captcha service. Extracts the files from the zip-file and creates tokens corresponding to the provided data.\\
+Corresponding URL: hostname/captcha/upload
+\item \verb|download(request)|: GET-Request called by the web interface, to retrieve tokens and solutions from the database. Collects \emph{CaptchaTokens}, that meet the requirements specified in the web interface, compresses them to a zip-file and returns the file.\\
+Corresponding URL: hostname/captcha/download
+\item \verb|getTask(request)|: GET-Request called by the web interface, to get all possible tasks for an \emph{ImageCaptchaSession}. Gets all tasks from the database and returns them as a list in a JsonResponse.\\
+Corresponding URL: hostname/captcha/getTask
 \item \verb|validate_solved_session(request)|: GET-Request called by the third party web application, to check if a \emph{CaptchaSession} was successfully validated by a client. This prevents clients from being able to bypass the Captcha challenge.
+Corresponding URL: hostname/captcha/validate-solved-session
 \end{itemize}
 
 \clearpage
