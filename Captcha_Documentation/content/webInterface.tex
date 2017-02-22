@@ -9,8 +9,8 @@ The upload functionality allows for data to be uploaded for labeling or to feed 
 First of all, the user chooses for which Captcha type he wants to upload his data and whether the data is already labeled or not.
 For image Captchas, the User has to choose between an already existing task or he can add a task himself. The task declares which images are to be selected when solving the specific Captcha challenge.
 
-For unsolved Captchas, the user simply has to upload a .zip-file containing his images.
-For solved Captchas, a .txt-file (CSV) is necessary containing each image name, followed with \verb|True| or \verb|False| for image Captchas or their solution word for text Captchas, separated by a comma.
+For unsolved Captchas, the user simply has to upload a .zip-file with a folder containing his images. The .zip-file and the included folder need to have the same name.
+For solved Captchas, the .zip-file must also contain a .txt-file (CSV). The .txt-file needs to containing each image name, followed with \verb|True| or \verb|False| for image Captchas, or their solution word for text Captchas, separated by a comma. If one of the images submitted is not included in the .txt-file it will be ignored. If the .txt-file contains an entry without a corresponding image in the image folder the upload will fail. 
 \begin{figure}[H]
 \centering
 \includegraphics[width=1\linewidth]{content/figures/upload.png}
