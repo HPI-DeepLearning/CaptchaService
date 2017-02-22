@@ -1,10 +1,5 @@
-\section{Implementation}
-\label{sec:implementation}
-
-\subsection{Server Side}
-\label{subsec:Server Side}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. In erat mauris, faucibus quis pharetra sit amet, pretium ac libero. Etiam vehicula eleifend bibendum. Morbi gravida metus ut sapien condimentum sodales mollis augue sodales. Vestibulum quis quam at sem placerat aliquet. Curabitur a felis at sapien ullamcorper fermentum. Mauris molestie arcu et lectus iaculis sit amet eleifend eros posuere. Fusce nec porta orci.
+\section{Integration}
+\label{sec:integration}
 
 \subsection{Client Side}
 \label{subsec:Client Side}
@@ -31,8 +26,8 @@ The Captcha service integrates seamlessly into existing web applications. It bas
  
  When the client hits the reload button, the Captcha service is asked via REST API to renew the \textit{session's Captcha tokens}. The response consists of a new list of \textit{tokens} of the same type as before. Subsequently, the old \textit{Captcha tokens} are replaced by the freshly received \textit{Captcha tokens}. The \textit{submit action} triggers the server-side solution validation via REST API. In case the solution was correct the form gets submitted including the \textit{session key}. When the solution is incorrect, the \textit{Captcha card} shakes in order to visually indicate the wrong solution and all newly assigned \textit{Captcha tokens} are inserted. This happens in order to prevent brute force solving. As soon as a wrong solution is submitted, the Captcha service assigns new \textit{Captcha tokens} to the \textit{session} and returns them as response to the client. As a result, you can not restore the old \textit{session tokens} and try to solve it by using all possible inputs.
 
-\subsection{Captcha Integration}
-\label{subsec:Captcha Integration}
+\subsection{Captcha Integration Workflow}
+\label{subsec:Captcha Integration Workflow}
 
 Integrating the Captcha service into your existing web application is fairly easy. You have to take the following steps:
 \begin{enumerate}
