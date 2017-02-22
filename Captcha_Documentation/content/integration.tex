@@ -1,8 +1,8 @@
 \section{Integration}
 \label{sec:integration}
 
-\subsection{Client Side}
-\label{subsec:Client Side}
+\subsection{Client Side Implementation}
+\label{subsec:Client Side Implementation}
 The Captcha service integrates seamlessly into existing web applications. It basically works by appending an invisible overlay to the body element of the existing website. The overlay fades in when the user hits the submit button of the captcha protected form. Thereby it does not affect the layout of the existing websites.
 \begin{figure}[H]
 	\centering
@@ -31,9 +31,9 @@ The Captcha service integrates seamlessly into existing web applications. It bas
 
 Integrating the Captcha service into your existing web application is fairly easy. You have to take the following steps:
 \begin{enumerate}
-	\item inject \texttt{captcha.min.css} and \texttt{captcha.min.js} to your HTML skeleton
+	\item inject \texttt{captcha.min.css} and \texttt{captcha.min.js} into your HTML skeleton
 	\item  Make sure the to be protected captcha form has the class \textit{captcha-form} and the corresponding submit button possesses the class \textit{captcha-button}
-	\item Finally, integrate an additional POST request to our captcha service including the clients \textit{session key} into your existing server-side code, that receives the form data, in order to assure that the user solved the Captcha correctly and did not modify the javascript code.
+	\item Finally, integrate an additional GET request to our captcha service including the clients \textit{session key} into your existing server-side code, that receives the form data, in order to assure that the user solved the Captcha correctly and did not modify the javascript code.
 \end{enumerate}
 
 \texttt{captcha.min.js} includes the client-side code, whose behaviour is described in the last section. \texttt{captcha.min.css} provides the initial styling. Feel free to modify it, such that it fits your design. 
