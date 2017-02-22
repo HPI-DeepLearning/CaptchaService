@@ -34,6 +34,7 @@ openbib,
 \usepackage[pdftex, colorlinks, linktocpage, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
 \usepackage[linesnumbered]{algorithm2e}
 \usepackage{float}
+\usepackage{listings}
 \pagestyle{scrheadings}
 
 
@@ -61,6 +62,12 @@ headsep=10mm, footskip=22mm}
 %%% INCLUDE ONLY
 \setlength{\parindent}{0cm}
 \setlength{\parskip}{0.25cm}
+%%% LISTINGS
+\lstdefinestyle{std}{
+	language=Python, 
+	breaklines=true,
+	tabsize=2
+}
 %%% DOCUMENT
 \begin{document}
 	%%% HEADER AND FOOTTITLES

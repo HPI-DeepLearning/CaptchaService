@@ -6,9 +6,40 @@ The images being provided by users for text Captchas, makes it impossible to tel
 The image distortion algorithm consists of two steps: the drawing of a horizontal line and a wave transformation.
 
 In the first step it places a horizontal line in the middle of the image, which is colored with the dominant color of the whole image. Afterwards this line will be transformed together with the rest of the image.
+The algorithm works via the kmeans clustering algorithm implemented in the scipy package. The implementation was taken from \href{http://stackoverflow.com/questions/3241929/python-find-dominant-most-common-color-in-an-image}{\underline{here}}.
 
-The frequency as well as the amplitude of the wave, which will be applied, are dependent on the height of the image. Furthermore the frequency depends on the width of the image so that one wavelength is at least as wide as the image itself. In addition, the frequency and the amplitude are modified by a random value in order make every transformation unique.
+After this the wave used for the transformation is calculated. A standard sinus wave is used which will be modified in frequency and amplitude by according modifiers. The frequency as well as the amplitude of the wave, which will be applied, are dependent on the height of the image. Furthermore the frequency depends on the width of the image so that one wavelength is at least as wide as the image itself. In addition, the frequency and the amplitude are modified by a random value in order make every transformation unique.\\
 
-Everything that is shifted out of bounds will be cut off. Additionally the pixels, which were located at the bottom and the top of the the original image will be stretched out vertically to fill the space, which was emptied due to the transformation.
+\begin{lstlisting}[style=std]
+frequency_modifier = Decimal(random.uniform(0.6, 0.8) * (width / height))
+frequency = frequency_modifier * (Decimal(1) / Decimal((width / 2))) * Decimal(math.pi)
+\end{lstlisting}
+
+\begin{lstlisting}[style=std]
+amplitude_modifier = random.uniform(5, 7)
+amplitude = (height / amplitude_modifier)
+\end{lstlisting}
+
+%\lstinputlisting[language=Python, firstline=17, lastline=24]{../server/api/captcha_service/image_distortion.py}
+
+The wave is then used to determine an vertical offset for every pixel in the image. Each point then will be shifted either up or down by the offset so that the new y-position is a point on the wave. 
+
+\begin{lstlisting}[style=std]
+for x in range(width):
+	for y in range(height):
+		shift = math.sin(frequency * x) * amplitude
+		new_y = y + shift
+		if new_y < height and new_y > 0:
+			output_data[x, y] = input_data[x, new_y]
+\end{lstlisting}
+
+Every pixel that would be shifted out of bounds will be cut off. Additionally the pixels, which were located at the bottom and the top of the the original image will be stretched out vertically to fill the space, which was emptied due to the transformation.
+
+\begin{lstlisting}[style=std]
+elif shift < 0:
+	output_data[x, y] = input_data[x, 0]
+elif shift >= 0:
+	output_data[x, y] = input_data[x, (height - 1)]
+\end{lstlisting}
 
 \clearpage
