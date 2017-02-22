@@ -65,8 +65,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    # Clickjacking protection, disabled for iFrame usage in presentation
-    # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Clickjacking protection, disable for iFrame usage in presentation
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'urls'
@@ -115,6 +115,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Email-address to sent authentication Email
 REST_SESSION_LOGIN = False
 ACCOUNT_AUTHENTICATION_METHOD = 'username'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -133,7 +134,6 @@ ACCOUNT_ACTIVATION_DAYS = 7  # One-week activation window
 
 # CORS Headers
 CORS_ORIGIN_ALLOW_ALL = True
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 

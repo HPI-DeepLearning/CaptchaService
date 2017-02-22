@@ -33,6 +33,7 @@ openbib,
 \usepackage{floatflt}
 \usepackage[pdftex, colorlinks, linktocpage, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
 \usepackage[linesnumbered]{algorithm2e}
+\usepackage{float}
 \pagestyle{scrheadings}
 
 
@@ -85,9 +86,9 @@ headsep=10mm, footskip=22mm}
 	% deutsche Zusammenfassung
 	}{%
 	% englischer abstract
-	The increasing numbers of bots, especially crawlers, within the World Wide Web has been a major concern for several years now. Over the years, different approaches to tackle bots were implemented and tested. One of the major solutions for dealing with bots in the recent years were Captchas. Originally, giving users specific tasks to solve, which bots would be unable to solve, was the main idea. Through distortion and other obstacles, Captchas were improved against algorithmic solutions.
+	The increasing numbers of bots, especially crawlers, within the World Wide Web has been a major concern for several years now. Over the years, different approaches to tackle bots were implemented and tested. Nowadays, one of the most widespread solutions for dealing with bots are Captchas. Originally, the main idea was to give users specific tasks to solve, which bots would be unable to solve. Through distortion and other obstacles, Captchas were improved against algorithmic solutions.
 	
-	The potential of million online users solving Captchas was quickly realized. Difficulties in identifying words or objects in images using computers, could be solved using the combined solutions of Captcha users. We implemented our own Captcha Service in order to allow researchers and scientists to get their own datasets labeled using on	line users.
+	The potential of million online users solving Captchas was quickly noticed. Difficulties in identifying words or objects in images using computers, could be solved using the combined solutions of Captcha users. We implemented our own Captcha Service in order to allow researchers and scientists to get their own datasets labeled using on	line users.
 	}
 	
 	%%% TOC
@@ -98,12 +99,13 @@ headsep=10mm, footskip=22mm}
 
 	%%%%%%%
 	%% Add content here !!! %%%
-	\input{content/introduction.tex}
+	\input{content/motivation.tex}
 	\input{content/relatedWork.tex}
 	\input{content/architecture.tex}
 	\input{content/imageDistortion.tex}
-	%\input{content/implementation.tex}
+	\input{content/implementation.tex}
 	\input{content/solvingAlgorithm.tex}
+	\input{content/webInterface.tex}
 	\input{content/evaluation.tex}
 	\input{content/futureWork.tex}
 	%%%%%%%%
@@ -114,8 +116,5 @@ headsep=10mm, footskip=22mm}
 	\bibliographystyle{babunsrt-fl}
 	\bibliography{projektbib}
 	\clearpage	
-	
-	\input{content/appendix.tex}
-	
-	
+
 \end{document}
