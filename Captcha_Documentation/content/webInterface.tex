@@ -10,7 +10,9 @@ First of all, the user chooses for which Captcha type he wants to upload his dat
 For image Captchas, the user has to choose between an already existing task or he can add a task himself. The task declares which images are to be selected when solving the specific Captcha challenge.
 
 For unsolved Captchas, the user simply has to upload a .zip-file with a folder containing his images. The .zip-file and the included folder need to have the same name.
-For solved Captchas, the .zip-file must also contain a .txt-file (CSV). The .txt-file needs to containing each image name, followed with \verb|True| or \verb|False| for image Captchas, or their solution word for text Captchas, separated by a comma. If one of the images submitted is not included in the .txt-file it will be ignored. If the .txt-file contains an entry without a corresponding image in the image folder the upload will fail. 
+For solved Captchas, the .zip-file must also contain a .txt-file in CSV format. The .txt-file needs to contain each image name, followed with \verb|True| or \verb|False| for image Captchas, or their solution word for text Captchas, separated by a comma.
+
+The restrictions for the .txt-file are currently very strict. As a result, if the .txt-file contains an entry without a corresponding image in the image folder or an empty line between entries, the upload will fail. If one of the images submitted is not included in the .txt-file, it will be ignored.
 \begin{figure}[H]
 \centering
 \includegraphics[width=1\linewidth]{content/figures/upload.png}
