@@ -143,7 +143,7 @@ def upload(request):
     # call collectstatic to add files to static folder
     call_command('collectstatic', verbosity=0, interactive=False)
     shutil.rmtree('tempupload')
-    return HttpResponseRedirect('/')
+    return HttpResponseRedirect('/upload/complete')
 
 
 @api_view(['GET'])
