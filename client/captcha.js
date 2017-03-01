@@ -218,8 +218,8 @@ var handleResponse = function (response) {
         if(!captchaSolved) { // when captcha is not solved yet summon captcha overlay
             e.preventDefault();
             // show captcha overlay
-            captchaOverlay.classList.add('show');
-            setTimeout(function(){captchaOverlay.classList.add('fadeIn');}, 10);
+            captchaOverlay.classList.add('captcha-overlay-show');
+            setTimeout(function(){captchaOverlay.classList.add('captcha-overlay-fadeIn');}, 10);
         }
     })
 
@@ -253,8 +253,8 @@ var handleResponse = function (response) {
     /* 6. Click on overlay should hide captcha card */
     var captchaOverlay = document.getElementsByClassName('overlay')[0];
     captchaOverlay.addEventListener('click', function(e){
-        captchaOverlay.classList.remove('fadeIn');
-        captchaOverlay.classList.remove('show');
+        captchaOverlay.classList.remove('captcha-overlay-fadeIn');
+        captchaOverlay.classList.remove('captcha-overlay-show');
     });
     var captchaCard = document.getElementsByClassName('captcha-card')[0];
     captchaCard.addEventListener('click', function(e){
