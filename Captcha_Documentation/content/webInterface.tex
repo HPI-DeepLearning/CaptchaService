@@ -105,6 +105,43 @@ Note that all images in the directory, which do not occur in the .txt-file are i
 \clearpage
 \subsubsection{Possible errors during upload}
 
+\begin{verbatim}
+Exception Value:
+[Errno 2] No such file or directory: 'tempupload/<zip-file-name>/'
+\end{verbatim}
+There is no captcha-directory in your .zip-file or the captcha-directory has a different name than the .zip-file.
+
+\begin{verbatim}
+Exception Value:
+[Errno 21] Is a directory: 'tempupload/'
+\end{verbatim}
+The .txt-file is either not existing or it is not on the same level as the image-directory.
+
+\begin{verbatim}
+Exception Value:
+cannot identify image file u'tempupload/<zip-file-name>/.DS_Store'
+\end{verbatim}
+This arrow can occur when you compress your files directly with a macOS operating system. Compress your files from the terminal using:
+\begin{lstlisting}
+zip -r <directory-name>.zip directory-name -x "*.DS_Store"
+\end{lstlisting}
+or to zip all content of your current directory, e.g. to zip .txt-file and image-directory simultaneously
+\begin{lstlisting}
+zip -r <directory-name>.zip * -x "*.DS_Store"
+\end{lstlisting}
+
+\begin{verbatim}
+Exception Value:
+[Errno 2] No such file or directory: u?tempupload/<zip-file-name>/<captcha-image>.png?
+\end{verbatim}
+This error occurs when you have a solution declared in your .txt-file, which does not exist in your image-directory.
+
+\begin{verbatim}
+Exception Value:
+need more than 1 value to unpack
+\end{verbatim}
+This error occurs when there is an empty line in your .txt-file.
+
 \clearpage
 \subsection{Download}
 
