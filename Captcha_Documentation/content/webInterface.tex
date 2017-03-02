@@ -20,6 +20,65 @@ The restrictions for the .txt-file are currently very strict. As a result, if th
 \label{fig:upload}
 \end{figure}
 
+\clearpage
+\subsubsection{Directory structure for upload}
+
+\textbf{Text Captcha (Unsolved):}
+
+In the .zip-file there has to be an directory, which has the same name as the .zip-file. All captcha images you wish to upload have to be directly located within the directory.
+\\
+\dirtree{%
+.1 directory-name.zip.
+.2 directory-name.
+.3 text-captcha1.png.
+.3 text-captcha2.png.
+.3 text-captcha3.png.
+.3  ....
+}
+
+\textbf{Text Captcha (Solved):}
+
+The directory tree is the same as for unsolved text Captchas. However, there is also an .txt-file, which contains the solutions for text Captcha.
+\\
+\dirtree{%
+.1 directory-name.zip.
+.2 random-name.txt.
+.2 directory-name.
+.3 text-captcha1.png.
+.3 text-captcha2.png.
+.3 text-captcha3.png.
+.3  ....
+}
+
+The .txt-file has the following structure with a semicolon as a delimiter between text Captcha and its solution.
+
+\begin{lstlisting}
+text-captcha1.png; solution1
+text-captcha1.png; solution2
+text-captcha3.png; solution3
+text-captcha4.png; solution4
+text-captcha5.png; solution5
+text-captcha6.png; solution6
+\end{lstlisting}
+
+Note that all images in the directory, which do not occur in the .txt-file are ignored and not uploaded!
+
+\clearpage
+\textbf{Image Captcha (Unsolved):}
+
+In the .zip-file there has to be an directory, which has the same name as the .zip-file. All captcha images you wish to upload have to be directly located within the directory.
+\\
+\dirtree{%
+.1 directory-name.zip.
+.2 directory-name.
+.3 image-captcha1.png.
+.3 image-captcha2.png.
+.3 image-captcha3.png.
+.3  ....
+}
+
+\textbf{Image Captcha (Solved):}
+
 \subsection{Download}
 
 The download functionality allows for data to be downloaded by choosing the Captcha type. The researcher can specify his task for image Captchas, whereas that is not possible for text Captchas. By pressing the download button, all Captchas matching the chosen type and/or task are downloaded into a .zip-file, together with a .txt-file. For text Captchas, the .txt-file contains all images names followed with their labeled word. For image Captchas, the .txt-file contains all images names followed with \verb|True| or \verb|False|, whether they match their specific task.
